@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SchoolStock</title>
+    <link rel="stylesheet" th:href="@{/css/base.css}">
+    <style>
+        header {
+            background-color: #ffffff;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+            padding: 0 2rem;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        header h1 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1a202c;
+        }
+
+        .btn-logout {
+            padding: 0.4rem 1rem;
+            background-color: #e53e3e;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.2s;
+        }
+
+        .btn-logout:hover {
+            background-color: #c53030;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>SchoolStock</h1>
+        <form th:action="@{/logout}" method="post">
+            <button type="submit" class="btn-logout">Logout</button>
+        </form>
+    </header>
+</body>
+</html>
