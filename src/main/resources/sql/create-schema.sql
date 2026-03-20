@@ -24,6 +24,15 @@ CREATE TABLE IF NOT EXISTS items (
     search_vector TSVECTOR
 );
 
+-- cart_items --------------------------------------------------
+CREATE TABLE IF NOT EXISTS cart_items (
+    id       BIGSERIAL PRIMARY KEY,
+    user_id  BIGINT    NOT NULL REFERENCES users(id)  ON DELETE CASCADE,
+    item_id  BIGINT    NOT NULL REFERENCES items(id)  ON DELETE CASCADE,
+    quantity INTEGER   NOT NULL DEFAULT 1 CHECK (quantity > 0),
+    UNIQUE (user_id, item_id)
+);
+
 -- GIN index for full-text search on items
 CREATE INDEX IF NOT EXISTS idx_items_search_vector
     ON items USING GIN(search_vector);

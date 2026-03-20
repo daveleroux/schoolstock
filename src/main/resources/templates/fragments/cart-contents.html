@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="cart-contents">
+    <p th:if="${#lists.isEmpty(cartItems)}" class="empty-msg">Your cart is empty.</p>
+    <div th:each="ci : ${cartItems}" class="cart-row">
+        <div class="cart-item-info">
+            <span class="item-name" th:text="${ci.item.name}">Name</span>
+            <span class="item-desc" th:text="${ci.item.description}">Description</span>
+        </div>
+        <div class="cart-item-controls">
+            <button th:attr="hx-post='/cart/' + ${ci.id} + '/decrease'"
+                    hx-target="#cart-contents"
+                    hx-swap="innerHTML"
+                    class="btn-qty"
+                    aria-label="Decrease quantity">&#8722;</button>
+            <span class="qty-display" th:text="${ci.quantity}">1</span>
+            <button th:attr="hx-post='/cart/' + ${ci.id} + '/increase'"
+                    hx-target="#cart-contents"
+                    hx-swap="innerHTML"
+                    class="btn-qty"
+                    aria-label="Increase quantity">&#43;</button>
+            <button th:attr="hx-post='/cart/' + ${ci.id} + '/remove'"
+                    hx-target="#cart-contents"
+                    hx-swap="innerHTML"
+                    class="btn-remove"
+                    aria-label="Remove item">&#10005;</button>
+        </div>
+    </div>
+</div>
+</body>
+</html>

@@ -10,7 +10,13 @@ import java.util.List;
 public interface ItemRepository extends JpaRepository<Item, Long> {
 
     @Query(
-        value = "SELECT * FROM items WHERE search_vector @@ plainto_tsquery('english', :query)",
+        value = """
+            SELECT * FROM items
+            WHERE search_vector @@ to_tsquery(
+                'english',
+                regexp_replace(trim(:query), '\\s+', ':* & ', 'g') || ':*'
+            )
+            """,
         nativeQuery = true
     )
     List<Item> search(@Param("query") String query);

@@ -1,11 +1,15 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf"        th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
     <title>SchoolStock</title>
     <link rel="stylesheet" th:href="@{/css/base.css}">
     <style>
+        /* ── Layout ──────────────────────────────────── */
         header {
             background-color: #ffffff;
             box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
@@ -22,6 +26,112 @@
             color: #1a202c;
         }
 
+        /* ── Tab bar ─────────────────────────────────── */
+        .tab-bar {
+            display: flex;
+            border-bottom: 2px solid #e2e8f0;
+            padding: 0 2rem;
+            background-color: #ffffff;
+        }
+
+        .tab-btn {
+            padding: 0.75rem 1.25rem;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+            font-size: 0.925rem;
+            font-weight: 600;
+            color: #718096;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            transition: color 0.15s, border-color 0.15s;
+        }
+
+        .tab-btn:hover { color: #2d3748; }
+
+        .tab-btn.active {
+            color: #3182ce;
+            border-bottom-color: #3182ce;
+        }
+
+        .tab-cart { margin-left: auto; }
+
+        /* ── Tab panels ──────────────────────────────── */
+        .tab-panel {
+            display: none;
+            padding: 2rem;
+        }
+
+        .tab-panel.active { display: block; }
+
+        /* ── Search bar ──────────────────────────────── */
+        .search-bar {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .search-bar input {
+            flex: 1;
+            padding: 0.6rem 0.9rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            color: #2d3748;
+            background-color: #f7fafc;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+            background-color: #fff;
+        }
+
+        /* ── Item rows ───────────────────────────────── */
+        .item-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #edf2f7;
+        }
+
+        .item-info { display: flex; flex-direction: column; gap: 0.15rem; }
+
+        .item-name { font-weight: 600; color: #2d3748; }
+
+        .item-desc { font-size: 0.875rem; color: #718096; }
+
+        /* ── Cart rows ───────────────────────────────── */
+        .cart-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid #edf2f7;
+        }
+
+        .cart-item-info { display: flex; flex-direction: column; gap: 0.15rem; }
+
+        .cart-item-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .qty-display {
+            min-width: 2rem;
+            text-align: center;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        /* ── Buttons ─────────────────────────────────── */
         .btn-logout {
             padding: 0.4rem 1rem;
             background-color: #e53e3e;
@@ -31,13 +141,63 @@
             font-size: 0.875rem;
             font-weight: 600;
             cursor: pointer;
-            text-decoration: none;
             transition: background-color 0.2s;
         }
 
-        .btn-logout:hover {
-            background-color: #c53030;
+        .btn-logout:hover { background-color: #c53030; }
+
+        .btn-add {
+            padding: 0.35rem 0.85rem;
+            background-color: #3182ce;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            white-space: nowrap;
         }
+
+        .btn-add:hover { background-color: #2b6cb0; }
+
+        .btn-qty {
+            width: 28px;
+            height: 28px;
+            background-color: #edf2f7;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.15s;
+        }
+
+        .btn-qty:hover { background-color: #e2e8f0; }
+
+        .btn-remove {
+            width: 28px;
+            height: 28px;
+            background-color: #fff5f5;
+            border: 1px solid #fed7d7;
+            border-radius: 6px;
+            color: #c53030;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.15s;
+        }
+
+        .btn-remove:hover { background-color: #fed7d7; }
+
+        .empty-msg { color: #a0aec0; font-style: italic; }
+
+        .stub-notice { color: #a0aec0; font-style: italic; }
     </style>
 </head>
 <body>
@@ -47,5 +207,68 @@
             <button type="submit" class="btn-logout">Logout</button>
         </form>
     </header>
+
+    <nav class="tab-bar" sec:authorize="hasRole('ORDERER')">
+        <button class="tab-btn active" data-tab="request-items">Request Items</button>
+        <button class="tab-btn"        data-tab="orders">Orders</button>
+        <button class="tab-btn tab-cart" data-tab="cart">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
+                 fill="none" stroke="currentColor" stroke-width="2.2"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="9" cy="21" r="1"></circle>
+                <circle cx="20" cy="21" r="1"></circle>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+            Cart
+        </button>
+    </nav>
+
+    <div sec:authorize="hasRole('ORDERER')">
+
+        <div id="panel-request-items" class="tab-panel active">
+            <div class="search-bar">
+                <input type="search"
+                       name="q"
+                       placeholder="Search items..."
+                       hx-get="/items/search"
+                       hx-trigger="input changed delay:300ms"
+                       hx-target="#search-results"
+                       hx-swap="innerHTML"
+                       autocomplete="off">
+            </div>
+            <div id="search-results"></div>
+        </div>
+
+        <div id="panel-orders" class="tab-panel">
+            <p class="stub-notice">Orders — coming soon.</p>
+        </div>
+
+        <div id="panel-cart" class="tab-panel">
+            <div id="cart-contents">
+                <div th:replace="~{fragments/cart-contents :: cart-contents}"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
+    <script>
+        // Attach CSRF token to every HTMX request
+        document.addEventListener('htmx:configRequest', (event) => {
+            const token  = document.querySelector('meta[name="_csrf"]').content;
+            const header = document.querySelector('meta[name="_csrf_header"]').content;
+            event.detail.headers[header] = token;
+        });
+
+        // Tab switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+            });
+        });
+    </script>
 </body>
 </html>
