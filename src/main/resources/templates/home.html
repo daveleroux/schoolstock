@@ -242,7 +242,7 @@
                        name="q"
                        placeholder="Search items..."
                        hx-get="/items/search"
-                       hx-trigger="input changed delay:300ms"
+                       hx-trigger="input changed delay:300ms, load"
                        hx-target="#search-results"
                        hx-swap="innerHTML"
                        autocomplete="off">

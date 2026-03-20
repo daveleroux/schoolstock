@@ -8,6 +8,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.data.domain.Sort;
+
 import java.util.List;
 
 @Controller
@@ -23,7 +25,10 @@ public class ItemController {
 
     @GetMapping("/items/search")
     public String search(@RequestParam(defaultValue = "") String q, Model model) {
-        model.addAttribute("items", q.isBlank() ? List.of() : itemRepository.search(q));
+        var items = q.isBlank()
+                ? itemRepository.findAll(Sort.by(Sort.Direction.ASC, "name"))
+                : itemRepository.search(q);
+        model.addAttribute("items", items);
         return "fragments/item-results :: item-results";
     }
 
