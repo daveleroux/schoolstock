@@ -209,7 +209,7 @@
     </header>
 
     <nav class="tab-bar" sec:authorize="hasRole('ORDERER')">
-        <button class="tab-btn active" data-tab="request-items">Request Items</button>
+        <button class="tab-btn" data-tab="request-items">Request Items</button>
         <button class="tab-btn"        data-tab="orders">Orders</button>
         <button class="tab-btn tab-cart" data-tab="cart">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
@@ -225,7 +225,7 @@
 
     <div sec:authorize="hasRole('ORDERER')">
 
-        <div id="panel-request-items" class="tab-panel active">
+        <div id="panel-request-items" class="tab-panel">
             <div class="search-bar">
                 <input type="search"
                        name="q"
@@ -260,15 +260,31 @@
             event.detail.headers[header] = token;
         });
 
-        // Tab switching
+        // Tab switching — hash-driven so back/forward navigation works
+        const DEFAULT_TAB = 'request-items';
+
+        function activateTab(tabName) {
+            const target = document.getElementById('panel-' + tabName);
+            if (!target) return;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            const btn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
+            if (btn) btn.classList.add('active');
+            target.classList.add('active');
+        }
+
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.addEventListener('click', () => {
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-                btn.classList.add('active');
-                document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+                window.location.hash = btn.dataset.tab;
             });
         });
+
+        window.addEventListener('hashchange', () => {
+            activateTab(window.location.hash.slice(1) || DEFAULT_TAB);
+        });
+
+        // Activate the correct tab on initial load
+        activateTab(window.location.hash.slice(1) || DEFAULT_TAB);
     </script>
 </body>
 </html>
