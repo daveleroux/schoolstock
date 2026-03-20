@@ -23,6 +23,9 @@ public class Item {
     @Column(nullable = false)
     private int stockQuantity = 0;
 
+    @Column(nullable = false)
+    private boolean provisional = false;
+
     public Item() {}
 
     public Item(String name, String description, int stockQuantity) {
@@ -57,5 +60,13 @@ public class Item {
 
     public void setStockQuantity(int stockQuantity) {
         this.stockQuantity = stockQuantity;
+    }
+
+    public boolean isProvisional() {
+        return provisional;
+    }
+
+    public void setProvisional(boolean provisional) {
+        this.provisional = provisional;
     }
 }

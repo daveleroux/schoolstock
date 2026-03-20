@@ -22,6 +22,7 @@ CREATE TABLE IF NOT EXISTS items (
     name           VARCHAR(255) NOT NULL,
     description    TEXT,
     stock_quantity INTEGER      NOT NULL DEFAULT 0 CHECK (stock_quantity >= 0),
+    provisional    BOOLEAN      NOT NULL DEFAULT FALSE,
     search_vector  TSVECTOR
 );
 

@@ -1,5 +1,6 @@
 package org.schoolstock.schoolstock.controller;
 
+import org.schoolstock.schoolstock.model.Item;
 import org.schoolstock.schoolstock.model.User;
 import org.schoolstock.schoolstock.repository.ItemRepository;
 import org.schoolstock.schoolstock.service.CartService;
@@ -10,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 
 import org.springframework.data.domain.Sort;
 
-import java.util.List;
 
 @Controller
 public class ItemController {
@@ -29,6 +29,19 @@ public class ItemController {
                 ? itemRepository.findAll(Sort.by(Sort.Direction.ASC, "name"))
                 : itemRepository.search(q);
         model.addAttribute("items", items);
+        return "fragments/item-results :: item-results";
+    }
+
+    @PostMapping("/items/request")
+    public String requestItem(@RequestParam String name,
+                              @RequestParam(defaultValue = "") String description,
+                              Model model) {
+        Item item = new Item();
+        item.setName(name.trim());
+        item.setDescription(description.isBlank() ? null : description.trim());
+        item.setProvisional(true);
+        itemRepository.save(item);
+        model.addAttribute("items", itemRepository.findAll(Sort.by(Sort.Direction.ASC, "name")));
         return "fragments/item-results :: item-results";
     }
 

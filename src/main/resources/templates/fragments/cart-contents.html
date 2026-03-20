@@ -5,7 +5,10 @@
     <p th:if="${#lists.isEmpty(cartItems)}" class="empty-msg">Your cart is empty.</p>
     <div th:each="ci : ${cartItems}" class="cart-row">
         <div class="cart-item-info">
-            <span class="item-name" th:text="${ci.item.name}">Name</span>
+            <span class="item-name">
+                <span th:text="${ci.item.name}">Name</span>
+                <span th:if="${ci.item.provisional}" class="badge-provisional">Provisional</span>
+            </span>
             <span class="item-desc" th:text="${ci.item.description}">Description</span>
         </div>
         <div class="cart-item-controls">

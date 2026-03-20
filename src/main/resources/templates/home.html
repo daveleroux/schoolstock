@@ -109,6 +109,162 @@
 
         .item-stock { font-size: 0.8rem; color: #a0aec0; }
 
+        .badge-provisional {
+            display: inline-block;
+            padding: 0.1rem 0.45rem;
+            background-color: #fefcbf;
+            border: 1px solid #f6e05e;
+            color: #744210;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            vertical-align: middle;
+            margin-left: 0.4rem;
+            letter-spacing: 0.02em;
+        }
+
+        /* ── Request new item ────────────────────────── */
+        .btn-request {
+            padding: 0.4rem 0.85rem;
+            background-color: #ffffff;
+            color: #3182ce;
+            border: 1px solid #3182ce;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background-color 0.15s, color 0.15s;
+        }
+
+        .btn-request:hover {
+            background-color: #ebf8ff;
+        }
+
+        .request-form-container {
+            display: none;
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .request-form-container h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 1rem;
+        }
+
+        .request-form-container .form-row {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .request-form-container input[type="text"] {
+            padding: 0.6rem 0.9rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            color: #2d3748;
+            background-color: #f7fafc;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .request-form-container input[type="text"]:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+            background-color: #fff;
+        }
+
+        .request-form-container .form-actions {
+            display: flex;
+            gap: 0.6rem;
+        }
+
+        .btn-submit-request {
+            padding: 0.45rem 1rem;
+            background-color: #3182ce;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-submit-request:hover { background-color: #2b6cb0; }
+
+        .btn-cancel-request {
+            padding: 0.45rem 1rem;
+            background-color: #edf2f7;
+            color: #4a5568;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.15s;
+        }
+
+        .btn-cancel-request:hover { background-color: #e2e8f0; }
+
+        /* ── Toast notifications ─────────────────────── */
+        #toast-container {
+            position: fixed;
+            bottom: 1.5rem;
+            right: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+            z-index: 1000;
+        }
+
+        .toast {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+            min-width: 240px;
+            max-width: 360px;
+            animation: toast-in 0.2s ease;
+        }
+
+        .toast-error {
+            background-color: #fff5f5;
+            border: 1px solid #fed7d7;
+            color: #c53030;
+        }
+
+        .toast-dismiss {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: inherit;
+            opacity: 0.6;
+            font-size: 1rem;
+            line-height: 1;
+            padding: 0;
+            flex-shrink: 0;
+        }
+
+        .toast-dismiss:hover { opacity: 1; }
+
+        @keyframes toast-in {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
         /* ── Cart rows ───────────────────────────────── */
         .cart-row {
             display: flex;
@@ -248,7 +404,32 @@
                        hx-target="#search-results"
                        hx-swap="innerHTML"
                        autocomplete="off">
+                <button type="button" class="btn-request"
+                        onclick="document.getElementById('request-form-container').style.display='block'; this.style.display='none'">
+                    + Request New Item
+                </button>
             </div>
+
+            <div id="request-form-container" class="request-form-container">
+                <h3>Request New Item</h3>
+                <form hx-post="/items/request"
+                      hx-target="#search-results"
+                      hx-swap="innerHTML"
+                      hx-on:htmx:after-request="if(event.detail.successful){ this.reset(); document.getElementById('request-form-container').style.display='none'; document.querySelector('.btn-request').style.display=''; }">
+                    <div class="form-row">
+                        <input type="text" name="name" placeholder="Item name" required>
+                        <input type="text" name="description" placeholder="Description (optional)">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-submit-request">Submit Request</button>
+                        <button type="button" class="btn-cancel-request"
+                                onclick="document.getElementById('request-form-container').style.display='none'; document.querySelector('.btn-request').style.display=''">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+
             <div id="search-results"></div>
         </div>
 
@@ -263,6 +444,8 @@
         </div>
 
     </div>
+
+    <div id="toast-container" aria-live="assertive" aria-atomic="false"></div>
 
     <script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
     <script>
@@ -298,6 +481,33 @@
 
         // Activate the correct tab on initial load
         activateTab(window.location.hash.slice(1) || DEFAULT_TAB);
+
+        // Toast notifications
+        function showToast(message, type = 'error') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.innerHTML = `
+                <span>${message}</span>
+                <button class="toast-dismiss" aria-label="Dismiss">&times;</button>`;
+
+            const dismiss = () => toast.remove();
+            toast.querySelector('.toast-dismiss').addEventListener('click', dismiss);
+
+            container.appendChild(toast);
+            setTimeout(dismiss, 5000);
+        }
+
+        // Fire a toast on any HTTP error response (4xx / 5xx)
+        document.addEventListener('htmx:responseError', (event) => {
+            const status = event.detail.xhr.status;
+            showToast(`Request failed (${status}). Please try again.`);
+        });
+
+        // Fire a toast when the network request itself couldn't be sent
+        document.addEventListener('htmx:sendError', () => {
+            showToast('Network error. Check your connection and try again.');
+        });
 
         // Add-to-cart button feedback
         document.addEventListener('htmx:afterRequest', (event) => {

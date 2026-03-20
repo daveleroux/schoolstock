@@ -5,7 +5,10 @@
     <p th:if="${#lists.isEmpty(items)}" class="empty-msg">No results found.</p>
     <div th:each="item : ${items}" class="item-row">
         <div class="item-info">
-            <span class="item-name" th:text="${item.name}">Name</span>
+            <span class="item-name">
+                <span th:text="${item.name}">Name</span>
+                <span th:if="${item.provisional}" class="badge-provisional">Provisional</span>
+            </span>
             <span class="item-desc" th:text="${item.description}">Description</span>
             <span class="item-stock" th:text="'In stock: ' + ${item.stockQuantity}">In stock: 0</span>
         </div>
