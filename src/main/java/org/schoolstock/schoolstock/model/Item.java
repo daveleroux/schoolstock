@@ -1,6 +1,7 @@
 package org.schoolstock.schoolstock.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 
 @Entity
@@ -18,11 +19,16 @@ public class Item {
     @Column
     private String description;
 
+    @Min(0)
+    @Column(nullable = false)
+    private int stockQuantity = 0;
+
     public Item() {}
 
-    public Item(String name, String description) {
+    public Item(String name, String description, int stockQuantity) {
         this.name = name;
         this.description = description;
+        this.stockQuantity = stockQuantity;
     }
 
     public Long getId() {
@@ -43,5 +49,13 @@ public class Item {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public int getStockQuantity() {
+        return stockQuantity;
+    }
+
+    public void setStockQuantity(int stockQuantity) {
+        this.stockQuantity = stockQuantity;
     }
 }

@@ -7,6 +7,7 @@
         <div class="item-info">
             <span class="item-name" th:text="${item.name}">Name</span>
             <span class="item-desc" th:text="${item.description}">Description</span>
+            <span class="item-stock" th:text="'In stock: ' + ${item.stockQuantity}">In stock: 0</span>
         </div>
         <button th:attr="hx-vals='{ &quot;itemId&quot;: ' + ${item.id} + '}'"
                 hx-post="/cart/add"

@@ -19,9 +19,10 @@ CREATE TABLE IF NOT EXISTS user_roles (
 -- items -------------------------------------------------------
 CREATE TABLE IF NOT EXISTS items (
     id            BIGSERIAL    PRIMARY KEY,
-    name          VARCHAR(255) NOT NULL,
-    description   TEXT,
-    search_vector TSVECTOR
+    name           VARCHAR(255) NOT NULL,
+    description    TEXT,
+    stock_quantity INTEGER      NOT NULL DEFAULT 0 CHECK (stock_quantity >= 0),
+    search_vector  TSVECTOR
 );
 
 -- cart_items --------------------------------------------------
