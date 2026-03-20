@@ -198,6 +198,17 @@
         .empty-msg { color: #a0aec0; font-style: italic; }
 
         .stub-notice { color: #a0aec0; font-style: italic; }
+
+        /* ── Add-to-cart button feedback ─────────────── */
+        .btn-add.btn-success {
+            background-color: #38a169;
+            cursor: default;
+        }
+
+        .btn-add.btn-error {
+            background-color: #e53e3e;
+            cursor: default;
+        }
     </style>
 </head>
 <body>
@@ -285,6 +296,25 @@
 
         // Activate the correct tab on initial load
         activateTab(window.location.hash.slice(1) || DEFAULT_TAB);
+
+        // Add-to-cart button feedback
+        document.addEventListener('htmx:afterRequest', (event) => {
+            const btn = event.target.closest('.btn-add');
+            if (!btn) return;
+
+            const succeeded = event.detail.successful;
+            const original  = btn.textContent.trim();
+
+            btn.textContent = succeeded ? '✓ Added' : '✗ Failed';
+            btn.classList.add(succeeded ? 'btn-success' : 'btn-error');
+            btn.disabled = true;
+
+            setTimeout(() => {
+                btn.textContent = original;
+                btn.classList.remove('btn-success', 'btn-error');
+                btn.disabled = false;
+            }, 1500);
+        });
     </script>
 </body>
 </html>
