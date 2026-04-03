@@ -26,6 +26,13 @@ CREATE TABLE IF NOT EXISTS items (
     search_vector  TSVECTOR
 );
 
+-- orderer_approvers -------------------------------------------
+CREATE TABLE IF NOT EXISTS orderer_approvers (
+    orderer_id  BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    approver_id BIGINT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    PRIMARY KEY (orderer_id, approver_id)
+);
+
 -- cart_items --------------------------------------------------
 CREATE TABLE IF NOT EXISTS cart_items (
     id       BIGSERIAL PRIMARY KEY,

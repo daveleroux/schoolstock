@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="admin-user-list">
+    <p th:if="${#lists.isEmpty(users)}" class="empty-msg">No users found.</p>
+
+    <div th:each="user : ${users}" class="admin-user-card">
+        <div class="admin-user-header">
+            <span class="admin-user-name" th:text="${user.username}">username</span>
+            <form th:attr="hx-post='/admin/users/' + ${user.id} + '/delete'"
+                  hx-target="#admin-user-list"
+                  hx-swap="innerHTML"
+                  hx-confirm="Delete this user permanently?"
+                  style="display:inline">
+                <button type="submit" class="btn-remove" aria-label="Delete user">&#10005;</button>
+            </form>
+        </div>
+
+        <!-- Roles -->
+        <div class="admin-section">
+            <span class="admin-section-label">Roles:</span>
+            <div class="admin-badge-list">
+                <th:block th:each="role : ${user.roles}">
+                    <span class="badge-role">
+                        <span th:text="${role.name()}">ROLE</span>
+                        <button th:attr="hx-post='/admin/users/' + ${user.id} + '/roles/remove'"
+                                th:attrappend="hx-vals='{ &quot;role&quot;: &quot;' + ${role.name()} + '&quot; }'"
+                                hx-target="#admin-user-list"
+                                hx-swap="innerHTML"
+                                class="badge-remove"
+                                aria-label="Remove role">&times;</button>
+                    </span>
+                </th:block>
+            </div>
+            <form class="admin-inline-form"
+                  th:attr="hx-post='/admin/users/' + ${user.id} + '/roles/add'"
+                  hx-target="#admin-user-list"
+                  hx-swap="innerHTML">
+                <select name="role" required>
+                    <option value="" disabled selected>Add role...</option>
+                    <th:block th:each="r : ${allRoles}">
+                        <option th:if="${!user.roles.contains(r)}"
+                                th:value="${r.name()}"
+                                th:text="${r.name()}">ROLE</option>
+                    </th:block>
+                </select>
+                <button type="submit" class="btn-small-add">Add</button>
+            </form>
+        </div>
+
+        <!-- Approvers (only for ORDERER users) -->
+        <div th:if="${user.roles.contains(T(org.schoolstock.schoolstock.model.Role).ORDERER)}"
+             class="admin-section">
+            <span class="admin-section-label">Approvers:</span>
+            <div class="admin-badge-list">
+                <th:block th:each="approver : ${user.approvers}">
+                    <span class="badge-approver">
+                        <span th:text="${approver.username}">approver</span>
+                        <button th:attr="hx-post='/admin/users/' + ${user.id} + '/approvers/remove'"
+                                th:attrappend="hx-vals='{ &quot;approverId&quot;: ' + ${approver.id} + ' }'"
+                                hx-target="#admin-user-list"
+                                hx-swap="innerHTML"
+                                class="badge-remove"
+                                aria-label="Remove approver">&times;</button>
+                    </span>
+                </th:block>
+            </div>
+            <form class="admin-inline-form"
+                  th:attr="hx-post='/admin/users/' + ${user.id} + '/approvers/add'"
+                  hx-target="#admin-user-list"
+                  hx-swap="innerHTML">
+                <select name="approverId" required>
+                    <option value="" disabled selected>Add approver...</option>
+                    <th:block th:each="a : ${approvers}">
+                        <option th:if="${!user.approvers.contains(a)}"
+                                th:value="${a.id}"
+                                th:text="${a.username}">approver</option>
+                    </th:block>
+                </select>
+                <button type="submit" class="btn-small-add">Add</button>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+</html>

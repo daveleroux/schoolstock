@@ -371,6 +371,142 @@
 
         .stub-notice { color: #a0aec0; font-style: italic; }
 
+        /* ── Admin user cards ─────────────────────────── */
+        .admin-user-card {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .admin-user-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.6rem;
+        }
+
+        .admin-user-name {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1a202c;
+        }
+
+        .admin-section {
+            margin-top: 0.5rem;
+        }
+
+        .admin-section-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            display: block;
+            margin-bottom: 0.35rem;
+        }
+
+        .admin-badge-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.35rem;
+            margin-bottom: 0.45rem;
+        }
+
+        .badge-role,
+        .badge-approver {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            padding: 0.2rem 0.55rem;
+            border-radius: 4px;
+            font-size: 0.78rem;
+            font-weight: 600;
+        }
+
+        .badge-role {
+            background-color: #ebf8ff;
+            border: 1px solid #bee3f8;
+            color: #2b6cb0;
+        }
+
+        .badge-approver {
+            background-color: #f0fff4;
+            border: 1px solid #c6f6d5;
+            color: #276749;
+        }
+
+        .badge-remove {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 0.85rem;
+            line-height: 1;
+            color: inherit;
+            opacity: 0.5;
+            padding: 0;
+        }
+
+        .badge-remove:hover { opacity: 1; }
+
+        .admin-inline-form {
+            display: flex;
+            gap: 0.4rem;
+            align-items: center;
+            margin-top: 0.25rem;
+        }
+
+        .admin-inline-form select {
+            padding: 0.3rem 0.5rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: #4a5568;
+            background-color: #f7fafc;
+        }
+
+        .btn-small-add {
+            padding: 0.3rem 0.65rem;
+            background-color: #3182ce;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.15s;
+        }
+
+        .btn-small-add:hover { background-color: #2b6cb0; }
+
+        .admin-create-form {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1.25rem;
+            display: flex;
+            gap: 0.6rem;
+            align-items: center;
+        }
+
+        .admin-create-form input {
+            padding: 0.5rem 0.8rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #2d3748;
+            background-color: #f7fafc;
+        }
+
+        .admin-create-form input:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+            background-color: #fff;
+        }
+
         /* ── Add-to-cart button feedback ─────────────── */
         .btn-add.btn-success {
             background-color: #38a169;
@@ -391,10 +527,11 @@
         </form>
     </header>
 
-    <nav class="tab-bar" sec:authorize="hasRole('ORDERER')">
-        <button class="tab-btn" data-tab="request-items">Request Items</button>
-        <button class="tab-btn"        data-tab="orders">Orders</button>
-        <button class="tab-btn tab-cart" data-tab="cart">
+    <nav class="tab-bar">
+        <button class="tab-btn" data-tab="request-items" sec:authorize="hasRole('ORDERER')">Request Items</button>
+        <button class="tab-btn" data-tab="orders" sec:authorize="hasRole('ORDERER')">Orders</button>
+        <button class="tab-btn" data-tab="user-admin" sec:authorize="hasRole('ADMIN')">User Admin</button>
+        <button class="tab-btn tab-cart" data-tab="cart" sec:authorize="hasRole('ORDERER')">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
                  fill="none" stroke="currentColor" stroke-width="2.2"
                  stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -406,9 +543,9 @@
         </button>
     </nav>
 
-    <div sec:authorize="hasRole('ORDERER')">
+    <div>
 
-        <div id="panel-request-items" class="tab-panel">
+        <div id="panel-request-items" class="tab-panel" sec:authorize="hasRole('ORDERER')">
             <div class="search-bar">
                 <input type="search"
                        name="q"
@@ -447,13 +584,30 @@
             <div id="search-results"></div>
         </div>
 
-        <div id="panel-orders" class="tab-panel">
+        <div id="panel-orders" class="tab-panel" sec:authorize="hasRole('ORDERER')">
             <p class="stub-notice">Orders — coming soon.</p>
         </div>
 
-        <div id="panel-cart" class="tab-panel">
+        <div id="panel-cart" class="tab-panel" sec:authorize="hasRole('ORDERER')">
             <div id="cart-contents">
                 <div th:replace="~{fragments/cart-contents :: cart-contents}"></div>
+            </div>
+        </div>
+
+        <div id="panel-user-admin" class="tab-panel" sec:authorize="hasRole('ADMIN')">
+            <form class="admin-create-form"
+                  hx-post="/admin/users/create"
+                  hx-target="#admin-user-list"
+                  hx-swap="innerHTML"
+                  hx-on:htmx:after-request="if(event.detail.successful) this.reset()">
+                <input type="text" name="username" placeholder="Username" required>
+                <input type="password" name="password" placeholder="Password" required>
+                <button type="submit" class="btn-small-add">Create User</button>
+            </form>
+            <div id="admin-user-list"
+                 hx-get="/admin/users"
+                 hx-trigger="load"
+                 hx-swap="innerHTML">
             </div>
         </div>
 
@@ -471,7 +625,8 @@
         });
 
         // Tab switching — hash-driven so back/forward navigation works
-        const DEFAULT_TAB = 'request-items';
+        const firstTab = document.querySelector('.tab-btn');
+        const DEFAULT_TAB = firstTab ? firstTab.dataset.tab : 'request-items';
 
         function activateTab(tabName) {
             const target = document.getElementById('panel-' + tabName);

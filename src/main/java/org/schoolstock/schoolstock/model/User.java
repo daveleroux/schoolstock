@@ -7,6 +7,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -30,6 +31,14 @@ public class User implements UserDetails {
     @Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
     private Set<Role> roles;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+        name = "orderer_approvers",
+        joinColumns = @JoinColumn(name = "orderer_id"),
+        inverseJoinColumns = @JoinColumn(name = "approver_id")
+    )
+    private Set<User> approvers = new HashSet<>();
 
     public User() {}
 
@@ -78,5 +87,13 @@ public class User implements UserDetails {
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
+    }
+
+    public Set<User> getApprovers() {
+        return approvers;
+    }
+
+    public void setApprovers(Set<User> approvers) {
+        this.approvers = approvers;
     }
 }
