@@ -507,6 +507,43 @@
             background-color: #fff;
         }
 
+        /* ── Order creation ──────────────────────────── */
+        .cart-footer {
+            margin-top: 1.25rem;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn-request-order {
+            padding: 0.55rem 1.25rem;
+            background-color: #38a169;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.925rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .btn-request-order:hover { background-color: #2f855a; }
+
+        .order-success-banner {
+            background-color: #f0fff4;
+            border: 1px solid #c6f6d5;
+            color: #276749;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .toast-success {
+            background-color: #f0fff4;
+            border: 1px solid #c6f6d5;
+            color: #276749;
+        }
+
         /* ── Add-to-cart button feedback ─────────────── */
         .btn-add.btn-success {
             background-color: #38a169;
@@ -517,6 +554,159 @@
             background-color: #e53e3e;
             cursor: default;
         }
+
+        /* ── Orders filter bar ───────────────────────── */
+        .orders-filter-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: flex-end;
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 0.9rem 1.25rem;
+            margin-bottom: 1.25rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .filter-group label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .filter-group input[type="date"],
+        .filter-group select {
+            padding: 0.4rem 0.65rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            color: #2d3748;
+            background-color: #f7fafc;
+        }
+
+        .filter-group input[type="date"]:focus,
+        .filter-group select:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+            background-color: #fff;
+        }
+
+        /* ── Order cards ─────────────────────────────── */
+        .order-card {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 1rem;
+        }
+
+        .order-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+
+        .order-id {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1a202c;
+        }
+
+        .order-date {
+            font-size: 0.85rem;
+            color: #718096;
+        }
+
+        /* ── Sub-order cards ─────────────────────────── */
+        .sub-order-card {
+            border: 1px solid #edf2f7;
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            margin-top: 0.5rem;
+            background-color: #f7fafc;
+        }
+
+        .sub-order-header {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .sub-order-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #4a5568;
+        }
+
+        /* ── State badges ────────────────────────────── */
+        .state-badge {
+            display: inline-block;
+            padding: 0.15rem 0.55rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        .state-needs-prices   { background-color: #fffbeb; border: 1px solid #fbd38d; color: #744210; }
+        .state-needs-approval { background-color: #ebf8ff; border: 1px solid #bee3f8; color: #2b6cb0; }
+        .state-pending        { background-color: #f0fff4; border: 1px solid #c6f6d5; color: #276749; }
+        .state-cancelled      { background-color: #f7fafc; border: 1px solid #cbd5e0; color: #718096; }
+        .state-delivered      { background-color: #e6fffa; border: 1px solid #b2f5ea; color: #234e52; }
+
+        /* ── Sub-order items table ───────────────────── */
+        .sub-order-items-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        .sub-order-items-table th,
+        .sub-order-items-table td {
+            padding: 0.3rem 0.5rem;
+            text-align: left;
+            border-bottom: 1px solid #edf2f7;
+            color: #4a5568;
+        }
+
+        .sub-order-items-table th {
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #a0aec0;
+        }
+
+        .sub-order-items-table .col-qty {
+            width: 4rem;
+            text-align: right;
+        }
+
+        /* ── Cancel sub-order button ─────────────────── */
+        .btn-cancel-suborder {
+            padding: 0.25rem 0.7rem;
+            background-color: #fff5f5;
+            color: #c53030;
+            border: 1px solid #fed7d7;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.15s;
+        }
+
+        .btn-cancel-suborder:hover { background-color: #fed7d7; }
     </style>
 </head>
 <body>
@@ -547,11 +737,12 @@
 
         <div id="panel-request-items" class="tab-panel" sec:authorize="hasRole('ORDERER')">
             <div class="search-bar">
-                <input type="search"
+                <input id="item-search-input"
+                       type="search"
                        name="q"
                        placeholder="Search items..."
                        hx-get="/items/search"
-                       hx-trigger="input changed delay:300ms, load"
+                       hx-trigger="input changed delay:300ms, load, tab-activated"
                        hx-target="#search-results"
                        hx-swap="innerHTML"
                        autocomplete="off">
@@ -585,7 +776,33 @@
         </div>
 
         <div id="panel-orders" class="tab-panel" sec:authorize="hasRole('ORDERER')">
-            <p class="stub-notice">Orders — coming soon.</p>
+            <form id="orders-filter-form" class="orders-filter-bar">
+                <div class="filter-group">
+                    <label for="orders-from">From</label>
+                    <input id="orders-from" type="date" name="from">
+                </div>
+                <div class="filter-group">
+                    <label for="orders-to">To</label>
+                    <input id="orders-to" type="date" name="to">
+                </div>
+                <div class="filter-group">
+                    <label for="orders-state">State</label>
+                    <select id="orders-state" name="state">
+                        <option value="ALL">&lt;All&gt;</option>
+                        <option value="NEEDS_PRICES">Needs Prices</option>
+                        <option value="NEEDS_APPROVAL">Needs Approval</option>
+                        <option value="PENDING">Pending</option>
+                        <option value="CANCELLED">Cancelled</option>
+                        <option value="DELIVERED">Delivered</option>
+                    </select>
+                </div>
+            </form>
+            <div id="order-list"
+                 hx-get="/orders"
+                 hx-trigger="tab-activated, change from:#orders-filter-form"
+                 hx-include="#orders-filter-form"
+                 hx-swap="innerHTML">
+            </div>
         </div>
 
         <div id="panel-cart" class="tab-panel" sec:authorize="hasRole('ORDERER')">
@@ -615,7 +832,7 @@
 
     <div id="toast-container" aria-live="assertive" aria-atomic="false"></div>
 
-    <script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
+    <script th:src="@{/js/htmx.min.js}"></script>
     <script>
         // Attach CSRF token to every HTMX request
         document.addEventListener('htmx:configRequest', (event) => {
@@ -636,6 +853,15 @@
             const btn = document.querySelector(`.tab-btn[data-tab="${tabName}"]`);
             if (btn) btn.classList.add('active');
             target.classList.add('active');
+
+            if (tabName === 'request-items') {
+                const input = document.getElementById('item-search-input');
+                if (input) htmx.trigger(input, 'tab-activated');
+            }
+            if (tabName === 'orders') {
+                const orderList = document.getElementById('order-list');
+                if (orderList) htmx.trigger(orderList, 'tab-activated');
+            }
         }
 
         document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -647,6 +873,20 @@
         window.addEventListener('hashchange', () => {
             activateTab(window.location.hash.slice(1) || DEFAULT_TAB);
         });
+
+        // Seed default date values for the orders filter
+        (function () {
+            const fromInput = document.getElementById('orders-from');
+            const toInput   = document.getElementById('orders-to');
+            if (!fromInput || !toInput) return;
+            const today = new Date();
+            const pad = n => String(n).padStart(2, '0');
+            const fmt = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+            toInput.value   = fmt(today);
+            const threeMonthsAgo = new Date(today);
+            threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+            fromInput.value = fmt(threeMonthsAgo);
+        })();
 
         // Activate the correct tab on initial load
         activateTab(window.location.hash.slice(1) || DEFAULT_TAB);

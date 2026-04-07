@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="order-list">
+
+    <p th:if="${#lists.isEmpty(orders)}" class="empty-msg">No orders found for the selected filters.</p>
+
+    <div th:each="order : ${orders}" class="order-card">
+
+        <div class="order-header">
+            <span class="order-id">Order #<span th:text="${order.id}"></span></span>
+            <span class="order-date"
+                  th:with="dt=${order.createdAt.atZone(T(java.time.ZoneOffset).UTC)}"
+                  th:text="${#temporals.format(dt, 'dd MMM yyyy, HH:mm')} + ' UTC'">
+            </span>
+        </div>
+
+        <div th:each="sub : ${order.subOrders}" class="sub-order-card">
+
+            <div class="sub-order-header">
+                <span class="sub-order-label">
+                    Sub-order <span th:text="${sub.sequenceNumber}"></span>
+                </span>
+                <span class="state-badge"
+                      th:classappend="${'state-' + sub.state.name().toLowerCase().replace('_', '-')}"
+                      th:text="${sub.state.displayName}">
+                </span>
+                <form th:if="${!sub.state.terminal}"
+                      th:attr="hx-post='/orders/sub-orders/' + ${sub.id} + '/cancel'"
+                      hx-target="#order-list"
+                      hx-swap="innerHTML"
+                      hx-include="#orders-filter-form"
+                      hx-confirm="Cancel this sub-order? This cannot be undone."
+                      style="margin-left: auto">
+                    <button type="submit" class="btn-cancel-suborder">Cancel</button>
+                </form>
+            </div>
+
+            <table class="sub-order-items-table">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th class="col-qty">Qty</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="soi : ${sub.items}">
+                        <td>
+                            <span th:text="${soi.item.name}"></span>
+                            <span th:if="${soi.item.provisional}" class="badge-provisional">Provisional</span>
+                        </td>
+                        <td class="col-qty" th:text="${soi.quantity}"></td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

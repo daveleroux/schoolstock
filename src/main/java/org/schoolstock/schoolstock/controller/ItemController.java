@@ -4,13 +4,13 @@ import org.schoolstock.schoolstock.model.Item;
 import org.schoolstock.schoolstock.model.User;
 import org.schoolstock.schoolstock.repository.ItemRepository;
 import org.schoolstock.schoolstock.service.CartService;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import org.springframework.data.domain.Sort;
-
+import java.util.List;
 
 @Controller
 public class ItemController {
@@ -18,14 +18,15 @@ public class ItemController {
     private final ItemRepository itemRepository;
     private final CartService cartService;
 
-    public ItemController(ItemRepository itemRepository, CartService cartService) {
+    public ItemController(ItemRepository itemRepository,
+                          CartService cartService) {
         this.itemRepository = itemRepository;
         this.cartService = cartService;
     }
 
     @GetMapping("/items/search")
     public String search(@RequestParam(defaultValue = "") String q, Model model) {
-        var items = q.isBlank()
+        List<Item> items = q.isBlank()
                 ? itemRepository.findAll(Sort.by(Sort.Direction.ASC, "name"))
                 : itemRepository.search(q);
         model.addAttribute("items", items);
@@ -41,7 +42,8 @@ public class ItemController {
         item.setDescription(description.isBlank() ? null : description.trim());
         item.setProvisional(true);
         itemRepository.save(item);
-        model.addAttribute("items", itemRepository.findAll(Sort.by(Sort.Direction.ASC, "name")));
+        List<Item> items = itemRepository.findAll(Sort.by(Sort.Direction.ASC, "name"));
+        model.addAttribute("items", items);
         return "fragments/item-results :: item-results";
     }
 

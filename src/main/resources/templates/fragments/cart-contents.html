@@ -2,7 +2,12 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
 <div th:fragment="cart-contents">
+    <div th:if="${createdOrderId}" class="order-success-banner">
+        Order <strong th:text="'#' + ${createdOrderId}">order</strong> created successfully.
+    </div>
+
     <p th:if="${#lists.isEmpty(cartItems)}" class="empty-msg">Your cart is empty.</p>
+
     <div th:each="ci : ${cartItems}" class="cart-row">
         <div class="cart-item-info">
             <span class="item-name">
@@ -29,6 +34,16 @@
                     class="btn-remove"
                     aria-label="Remove item">&#10005;</button>
         </div>
+    </div>
+
+    <div th:if="${!#lists.isEmpty(cartItems)}" class="cart-footer">
+        <button hx-post="/orders/create"
+                hx-target="#cart-contents"
+                hx-swap="innerHTML"
+                hx-confirm="Submit this cart as an order?"
+                class="btn-request-order">
+            Request Items
+        </button>
     </div>
 </div>
 </body>

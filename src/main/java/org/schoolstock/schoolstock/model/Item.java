@@ -3,6 +3,7 @@ package org.schoolstock.schoolstock.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.PositiveOrZero;
 
 @Entity
 @Table(name = "items")
@@ -26,12 +27,17 @@ public class Item {
     @Column(nullable = false)
     private boolean provisional = false;
 
+    @PositiveOrZero
+    @Column(nullable = false)
+    private int availableStock = 0;
+
     public Item() {}
 
     public Item(String name, String description, int stockQuantity) {
         this.name = name;
         this.description = description;
         this.stockQuantity = stockQuantity;
+        this.availableStock = stockQuantity;
     }
 
     public Long getId() {
@@ -68,5 +74,13 @@ public class Item {
 
     public void setProvisional(boolean provisional) {
         this.provisional = provisional;
+    }
+
+    public int getAvailableStock() {
+        return availableStock;
+    }
+
+    public void setAvailableStock(int availableStock) {
+        this.availableStock = availableStock;
     }
 }
