@@ -707,6 +707,39 @@
         }
 
         .btn-cancel-suborder:hover { background-color: #fed7d7; }
+
+        /* ── Sub-order action buttons (stock controller) ── */
+        .sub-order-actions {
+            display: flex;
+            gap: 0.4rem;
+            margin-left: auto;
+        }
+
+        .btn-deliver {
+            padding: 0.25rem 0.7rem;
+            background-color: #f0fff4;
+            color: #276749;
+            border: 1px solid #c6f6d5;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.15s;
+        }
+
+        .btn-deliver:hover { background-color: #c6f6d5; }
+
+        /* ── Order header with creator ───────────────────── */
+        .order-header-left {
+            display: flex;
+            flex-direction: column;
+            gap: 0.15rem;
+        }
+
+        .order-created-by {
+            font-size: 0.8rem;
+            color: #a0aec0;
+        }
     </style>
 </head>
 <body>
@@ -721,6 +754,7 @@
         <button class="tab-btn" data-tab="request-items" sec:authorize="hasRole('ORDERER')">Request Items</button>
         <button class="tab-btn" data-tab="orders" sec:authorize="hasRole('ORDERER')">Orders</button>
         <button class="tab-btn" data-tab="user-admin" sec:authorize="hasRole('ADMIN')">User Admin</button>
+        <button class="tab-btn" data-tab="pending-orders" sec:authorize="hasRole('STOCK_CONTROLLER')">Pending Orders</button>
         <button class="tab-btn tab-cart" data-tab="cart" sec:authorize="hasRole('ORDERER')">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
                  fill="none" stroke="currentColor" stroke-width="2.2"
@@ -742,7 +776,7 @@
                        name="q"
                        placeholder="Search items..."
                        hx-get="/items/search"
-                       hx-trigger="input changed delay:300ms, load, tab-activated"
+                       hx-trigger="input changed delay:300ms, tab-activated"
                        hx-target="#search-results"
                        hx-swap="innerHTML"
                        autocomplete="off">
@@ -828,6 +862,14 @@
             </div>
         </div>
 
+        <div id="panel-pending-orders" class="tab-panel" sec:authorize="hasRole('STOCK_CONTROLLER')">
+            <div id="pending-orders"
+                 hx-get="/stock/orders"
+                 hx-trigger="tab-activated"
+                 hx-swap="innerHTML">
+            </div>
+        </div>
+
     </div>
 
     <div id="toast-container" aria-live="assertive" aria-atomic="false"></div>
@@ -862,6 +904,10 @@
                 const orderList = document.getElementById('order-list');
                 if (orderList) htmx.trigger(orderList, 'tab-activated');
             }
+            if (tabName === 'pending-orders') {
+                const pendingOrders = document.getElementById('pending-orders');
+                if (pendingOrders) htmx.trigger(pendingOrders, 'tab-activated');
+            }
         }
 
         document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -874,22 +920,24 @@
             activateTab(window.location.hash.slice(1) || DEFAULT_TAB);
         });
 
-        // Seed default date values for the orders filter
-        (function () {
+        // Seed default date values and activate the initial tab once HTMX has
+        // finished processing the DOM (DOMContentLoaded). Without this deferral,
+        // htmx.trigger() fires before HTMX has registered listeners on the elements.
+        document.addEventListener('DOMContentLoaded', () => {
             const fromInput = document.getElementById('orders-from');
             const toInput   = document.getElementById('orders-to');
-            if (!fromInput || !toInput) return;
-            const today = new Date();
-            const pad = n => String(n).padStart(2, '0');
-            const fmt = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-            toInput.value   = fmt(today);
-            const threeMonthsAgo = new Date(today);
-            threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
-            fromInput.value = fmt(threeMonthsAgo);
-        })();
+            if (fromInput && toInput) {
+                const today = new Date();
+                const pad = n => String(n).padStart(2, '0');
+                const fmt = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+                toInput.value   = fmt(today);
+                const threeMonthsAgo = new Date(today);
+                threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+                fromInput.value = fmt(threeMonthsAgo);
+            }
 
-        // Activate the correct tab on initial load
-        activateTab(window.location.hash.slice(1) || DEFAULT_TAB);
+            activateTab(window.location.hash.slice(1) || DEFAULT_TAB);
+        });
 
         // Toast notifications
         function showToast(message, type = 'error') {

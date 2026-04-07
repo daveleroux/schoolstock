@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="pending-orders">
+
+    <p th:if="${#lists.isEmpty(orders)}" class="empty-msg">No orders with pending sub-orders.</p>
+
+    <div th:each="order : ${orders}" class="order-card">
+
+        <div class="order-header">
+            <div class="order-header-left">
+                <span class="order-id">Order #<span th:text="${order.id}"></span></span>
+                <span class="order-created-by" th:text="${order.createdBy.username}"></span>
+            </div>
+            <span class="order-date"
+                  th:with="dt=${order.createdAt.atZone(T(java.time.ZoneOffset).UTC)}"
+                  th:text="${#temporals.format(dt, 'dd MMM yyyy, HH:mm')} + ' UTC'">
+            </span>
+        </div>
+
+        <div th:each="sub : ${order.subOrders}" class="sub-order-card">
+
+            <div class="sub-order-header">
+                <span class="sub-order-label">
+                    Sub-order <span th:text="${sub.sequenceNumber}"></span>
+                </span>
+                <span class="state-badge"
+                      th:classappend="${'state-' + sub.state.name().toLowerCase().replace('_', '-')}"
+                      th:text="${sub.state.displayName}">
+                </span>
+                <div th:if="${sub.state.name() == 'PENDING'}" class="sub-order-actions">
+                    <form th:attr="hx-post='/stock/sub-orders/' + ${sub.id} + '/deliver'"
+                          hx-target="#pending-orders"
+                          hx-swap="innerHTML"
+                          hx-confirm="Mark this sub-order as delivered? This will reduce total stock.">
+                        <button type="submit" class="btn-deliver">Delivered</button>
+                    </form>
+                    <form th:attr="hx-post='/stock/sub-orders/' + ${sub.id} + '/cancel'"
+                          hx-target="#pending-orders"
+                          hx-swap="innerHTML"
+                          hx-confirm="Cancel this sub-order? This will restore available stock.">
+                        <button type="submit" class="btn-cancel-suborder">Cancel</button>
+                    </form>
+                </div>
+            </div>
+
+            <table class="sub-order-items-table">
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th class="col-qty">Qty</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="soi : ${sub.items}">
+                        <td>
+                            <span th:text="${soi.item.name}"></span>
+                            <span th:if="${soi.item.provisional}" class="badge-provisional">Provisional</span>
+                        </td>
+                        <td class="col-qty" th:text="${soi.quantity}"></td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -45,6 +45,25 @@ public class OrderService {
         return orders;
     }
 
+    @Transactional(readOnly = true)
+    public List<Order> getPendingOrders() {
+        return orderRepository.findOrdersWithSubOrderInState(SubOrderState.PENDING);
+    }
+
+    public void deliverSubOrder(Long subOrderId) {
+        SubOrder subOrder = subOrderRepository.findById(subOrderId)
+                .orElseThrow(() -> new IllegalArgumentException("Sub-order not found: " + subOrderId));
+        if (!subOrder.getState().canTransitionTo(SubOrderState.DELIVERED)) {
+            throw new IllegalStateException("Cannot deliver sub-order in state: " + subOrder.getState());
+        }
+        for (SubOrderItem soi : subOrder.getItems()) {
+            Item item = soi.getItem();
+            // Decrease total stock; availableStock was already decremented when PENDING was created
+            item.setStockQuantity(item.getStockQuantity() - soi.getQuantity());
+        }
+        subOrder.setState(SubOrderState.DELIVERED);
+    }
+
     public void cancelSubOrder(Long subOrderId) {
         SubOrder subOrder = subOrderRepository.findById(subOrderId)
                 .orElseThrow(() -> new IllegalArgumentException("Sub-order not found: " + subOrderId));
