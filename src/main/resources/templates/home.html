@@ -729,6 +729,65 @@
 
         .btn-deliver:hover { background-color: #c6f6d5; }
 
+        /* ── Needs Prices ────────────────────────────── */
+        .col-price { width: 12rem; text-align: right; }
+
+        .price-form {
+            display: flex;
+            gap: 0.35rem;
+            justify-content: flex-end;
+            align-items: center;
+        }
+
+        .price-input {
+            width: 7rem;
+            padding: 0.25rem 0.45rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            color: #2d3748;
+            background-color: #f7fafc;
+            text-align: right;
+        }
+
+        .price-input:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+            background-color: #fff;
+        }
+
+        .btn-save-price {
+            padding: 0.2rem 0.55rem;
+            background-color: #edf2f7;
+            color: #4a5568;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background-color 0.15s;
+        }
+
+        .btn-save-price:hover { background-color: #e2e8f0; }
+
+        .btn-capture-prices {
+            padding: 0.25rem 0.7rem;
+            background-color: #ebf8ff;
+            color: #2b6cb0;
+            border: 1px solid #bee3f8;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.15s;
+        }
+
+        .btn-capture-prices:hover { background-color: #bee3f8; }
+
+        .row-price-missing td { background-color: #fffbeb; }
+
         /* ── Order header with creator ───────────────────── */
         .order-header-left {
             display: flex;
@@ -754,6 +813,7 @@
         <button class="tab-btn" data-tab="request-items" sec:authorize="hasRole('ORDERER')">Request Items</button>
         <button class="tab-btn" data-tab="orders" sec:authorize="hasRole('ORDERER')">Orders</button>
         <button class="tab-btn" data-tab="user-admin" sec:authorize="hasRole('ADMIN')">User Admin</button>
+        <button class="tab-btn" data-tab="needs-prices" sec:authorize="hasRole('STOCK_CONTROLLER')">Needs Prices</button>
         <button class="tab-btn" data-tab="pending-orders" sec:authorize="hasRole('STOCK_CONTROLLER')">Pending Orders</button>
         <button class="tab-btn tab-cart" data-tab="cart" sec:authorize="hasRole('ORDERER')">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
@@ -862,6 +922,14 @@
             </div>
         </div>
 
+        <div id="panel-needs-prices" class="tab-panel" sec:authorize="hasRole('STOCK_CONTROLLER')">
+            <div id="needs-prices-orders"
+                 hx-get="/stock/needs-prices"
+                 hx-trigger="tab-activated"
+                 hx-swap="innerHTML">
+            </div>
+        </div>
+
         <div id="panel-pending-orders" class="tab-panel" sec:authorize="hasRole('STOCK_CONTROLLER')">
             <div id="pending-orders"
                  hx-get="/stock/orders"
@@ -903,6 +971,10 @@
             if (tabName === 'orders') {
                 const orderList = document.getElementById('order-list');
                 if (orderList) htmx.trigger(orderList, 'tab-activated');
+            }
+            if (tabName === 'needs-prices') {
+                const needsPrices = document.getElementById('needs-prices-orders');
+                if (needsPrices) htmx.trigger(needsPrices, 'tab-activated');
             }
             if (tabName === 'pending-orders') {
                 const pendingOrders = document.getElementById('pending-orders');

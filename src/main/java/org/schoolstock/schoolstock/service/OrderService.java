@@ -3,10 +3,13 @@ package org.schoolstock.schoolstock.service;
 import org.schoolstock.schoolstock.model.*;
 import org.schoolstock.schoolstock.repository.CartItemRepository;
 import org.schoolstock.schoolstock.repository.OrderRepository;
+import org.schoolstock.schoolstock.repository.SubOrderItemRepository;
 import org.schoolstock.schoolstock.repository.SubOrderRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -20,13 +23,16 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final CartItemRepository cartItemRepository;
     private final SubOrderRepository subOrderRepository;
+    private final SubOrderItemRepository subOrderItemRepository;
 
     public OrderService(OrderRepository orderRepository,
                         CartItemRepository cartItemRepository,
-                        SubOrderRepository subOrderRepository) {
+                        SubOrderRepository subOrderRepository,
+                        SubOrderItemRepository subOrderItemRepository) {
         this.orderRepository = orderRepository;
         this.cartItemRepository = cartItemRepository;
         this.subOrderRepository = subOrderRepository;
+        this.subOrderItemRepository = subOrderItemRepository;
     }
 
     @Transactional(readOnly = true)
@@ -48,6 +54,31 @@ public class OrderService {
     @Transactional(readOnly = true)
     public List<Order> getPendingOrders() {
         return orderRepository.findOrdersWithSubOrderInState(SubOrderState.PENDING);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Order> getNeedsPricesOrders() {
+        return orderRepository.findOrdersWithSubOrderInState(SubOrderState.NEEDS_PRICES);
+    }
+
+    public void saveEstimatedPrice(Long subOrderItemId, BigDecimal price) {
+        SubOrderItem soi = subOrderItemRepository.findById(subOrderItemId)
+                .orElseThrow(() -> new IllegalArgumentException("Sub-order item not found: " + subOrderItemId));
+        soi.setEstimatedPrice(price.setScale(2, RoundingMode.HALF_UP));
+    }
+
+    public void captureSubOrderPrices(Long subOrderId) {
+        SubOrder subOrder = subOrderRepository.findById(subOrderId)
+                .orElseThrow(() -> new IllegalArgumentException("Sub-order not found: " + subOrderId));
+        if (subOrder.getState() != SubOrderState.NEEDS_PRICES) {
+            throw new IllegalStateException("Sub-order is not in the Needs Prices state.");
+        }
+        boolean allCaptured = subOrder.getItems().stream()
+                .allMatch(soi -> soi.getEstimatedPrice() != null);
+        if (!allCaptured) {
+            throw new IllegalStateException("Not all item prices have been captured.");
+        }
+        subOrder.setState(SubOrderState.NEEDS_APPROVAL);
     }
 
     public void deliverSubOrder(Long subOrderId) {

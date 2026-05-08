@@ -68,10 +68,11 @@ CREATE INDEX IF NOT EXISTS idx_sub_orders_state ON sub_orders(state);
 
 -- sub_order_items ----------------------------------------------
 CREATE TABLE IF NOT EXISTS sub_order_items (
-    id           BIGSERIAL PRIMARY KEY,
-    sub_order_id BIGINT    NOT NULL REFERENCES sub_orders(id) ON DELETE CASCADE,
-    item_id      BIGINT    NOT NULL REFERENCES items(id),
-    quantity     INTEGER   NOT NULL CHECK (quantity > 0)
+    id              BIGSERIAL    PRIMARY KEY,
+    sub_order_id    BIGINT       NOT NULL REFERENCES sub_orders(id) ON DELETE CASCADE,
+    item_id         BIGINT       NOT NULL REFERENCES items(id),
+    quantity        INTEGER      NOT NULL CHECK (quantity > 0),
+    estimated_price NUMERIC(10,2)
 );
 
 -- GIN index for full-text search on items

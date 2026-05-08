@@ -2,6 +2,8 @@ package org.schoolstock.schoolstock.model;
 
 import jakarta.persistence.*;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "sub_order_items")
 public class SubOrderItem {
@@ -20,6 +22,9 @@ public class SubOrderItem {
 
     @Column(nullable = false)
     private int quantity;
+
+    @Column(precision = 10, scale = 2)
+    private BigDecimal estimatedPrice;
 
     public SubOrderItem() {}
 
@@ -42,4 +47,8 @@ public class SubOrderItem {
     public int getQuantity() { return quantity; }
 
     public void setQuantity(int quantity) { this.quantity = quantity; }
+
+    public BigDecimal getEstimatedPrice() { return estimatedPrice; }
+
+    public void setEstimatedPrice(BigDecimal estimatedPrice) { this.estimatedPrice = estimatedPrice; }
 }
