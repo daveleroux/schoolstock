@@ -10,9 +10,9 @@ public enum SubOrderState {
         @Override public Set<SubOrderState> validTransitions() { return Set.of(NEEDS_APPROVAL, CANCELLED); }
     },
     NEEDS_APPROVAL {
-        @Override public Set<SubOrderState> validTransitions() { return Set.of(PENDING, CANCELLED); }
+        @Override public Set<SubOrderState> validTransitions() { return Set.of(PACKING, CANCELLED); }
     },
-    PENDING {
+    PACKING {
         @Override public Set<SubOrderState> validTransitions() { return Set.of(DELIVERED, CANCELLED); }
     },
     CANCELLED {

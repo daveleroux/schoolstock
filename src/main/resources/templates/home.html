@@ -814,7 +814,7 @@
         <button class="tab-btn" data-tab="orders" sec:authorize="hasRole('ORDERER')">Orders</button>
         <button class="tab-btn" data-tab="user-admin" sec:authorize="hasRole('ADMIN')">User Admin</button>
         <button class="tab-btn" data-tab="needs-prices" sec:authorize="hasRole('STOCK_CONTROLLER')">Needs Prices</button>
-        <button class="tab-btn" data-tab="pending-orders" sec:authorize="hasRole('STOCK_CONTROLLER')">Pending Orders</button>
+        <button class="tab-btn" data-tab="pending-orders" sec:authorize="hasRole('STOCK_CONTROLLER')">Packing Orders</button>
         <button class="tab-btn tab-cart" data-tab="cart" sec:authorize="hasRole('ORDERER')">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
                  fill="none" stroke="currentColor" stroke-width="2.2"
@@ -885,7 +885,7 @@
                         <option value="ALL">&lt;All&gt;</option>
                         <option value="NEEDS_PRICES">Needs Prices</option>
                         <option value="NEEDS_APPROVAL">Needs Approval</option>
-                        <option value="PENDING">Pending</option>
+                        <option value="PACKING">Packing</option>
                         <option value="CANCELLED">Cancelled</option>
                         <option value="DELIVERED">Delivered</option>
                     </select>

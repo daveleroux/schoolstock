@@ -29,7 +29,7 @@
                       th:classappend="${'state-' + sub.state.name().toLowerCase().replace('_', '-')}"
                       th:text="${sub.state.displayName}">
                 </span>
-                <div th:if="${sub.state.name() == 'PENDING'}" class="sub-order-actions">
+                <div th:if="${sub.state.name() == 'PACKING'}" class="sub-order-actions">
                     <form th:attr="hx-post='/stock/sub-orders/' + ${sub.id} + '/deliver'"
                           hx-target="#pending-orders"
                           hx-swap="innerHTML"

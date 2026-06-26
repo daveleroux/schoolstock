@@ -53,7 +53,7 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public List<Order> getPendingOrders() {
-        return orderRepository.findOrdersWithSubOrderInState(SubOrderState.PENDING);
+        return orderRepository.findOrdersWithSubOrderInState(SubOrderState.PACKING);
     }
 
     @Transactional(readOnly = true)
@@ -89,7 +89,7 @@ public class OrderService {
         }
         for (SubOrderItem soi : subOrder.getItems()) {
             Item item = soi.getItem();
-            // Decrease total stock; availableStock was already decremented when PENDING was created
+            // Decrease total stock; availableStock was already decremented when PACKING was created
             item.setStockQuantity(item.getStockQuantity() - soi.getQuantity());
         }
         subOrder.setState(SubOrderState.DELIVERED);
@@ -102,7 +102,7 @@ public class OrderService {
         if (!current.canTransitionTo(SubOrderState.CANCELLED)) {
             throw new IllegalStateException("Cannot cancel sub-order in state: " + current);
         }
-        if (current == SubOrderState.PENDING) {
+        if (current == SubOrderState.PACKING) {
             for (SubOrderItem soi : subOrder.getItems()) {
                 Item item = soi.getItem();
                 item.setAvailableStock(item.getAvailableStock() + soi.getQuantity());
@@ -114,11 +114,11 @@ public class OrderService {
     /**
      * Creates an Order from the current user's cart, then clears the cart.
      * Splitting rules:
-     *   - quantity ≤ availableStock → entire quantity → PENDING sub-order
-     *   - quantity > availableStock > 0 → split into PENDING + NEEDS_PRICES
+     *   - quantity ≤ availableStock → entire quantity → PACKING sub-order
+     *   - quantity > availableStock > 0 → split into PACKING + NEEDS_PRICES
      *   - availableStock = 0 → entire quantity → NEEDS_PRICES sub-order
      *
-     * The persistent availableStock on each Item is decremented by the PENDING quantity.
+     * The persistent availableStock on each Item is decremented by the PACKING quantity.
      */
     public Order createOrder(User user) {
         List<CartItem> cartItems = cartItemRepository.findByUser(user);
@@ -150,7 +150,7 @@ public class OrderService {
         int seq = 1;
 
         if (!pendingItems.isEmpty()) {
-            SubOrder sub = new SubOrder(order, SubOrderState.PENDING, seq++);
+            SubOrder sub = new SubOrder(order, SubOrderState.PACKING, seq++);
             for (SubOrderItem soi : pendingItems) {
                 soi.setSubOrder(sub);
                 sub.getItems().add(soi);
