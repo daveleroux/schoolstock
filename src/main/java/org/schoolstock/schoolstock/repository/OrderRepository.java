@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
@@ -33,4 +34,16 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             ORDER BY o.createdAt ASC
             """)
     List<Order> findOrdersWithSubOrderInState(@Param("state") SubOrderState state);
+
+    @Query("""
+            SELECT DISTINCT o FROM Order o
+            LEFT JOIN FETCH o.subOrders
+            WHERE o.createdBy IN :orderers
+              AND EXISTS (
+                  SELECT s FROM SubOrder s WHERE s.order = o AND s.state = :state
+              )
+            ORDER BY o.createdAt ASC
+            """)
+    List<Order> findOrdersForOrderersWithSubOrderInState(@Param("orderers") Collection<User> orderers,
+                                                         @Param("state") SubOrderState state);
 }

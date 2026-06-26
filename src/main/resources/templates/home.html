@@ -729,6 +729,20 @@
 
         .btn-deliver:hover { background-color: #c6f6d5; }
 
+        .btn-approve {
+            padding: 0.25rem 0.7rem;
+            background-color: #f0fff4;
+            color: #276749;
+            border: 1px solid #c6f6d5;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.15s;
+        }
+
+        .btn-approve:hover { background-color: #c6f6d5; }
+
         /* ── Needs Prices ────────────────────────────── */
         .col-price { width: 12rem; text-align: right; }
 
@@ -812,6 +826,7 @@
     <nav class="tab-bar">
         <button class="tab-btn" data-tab="request-items" sec:authorize="hasRole('ORDERER')">Request Items</button>
         <button class="tab-btn" data-tab="orders" sec:authorize="hasRole('ORDERER')">Orders</button>
+        <button class="tab-btn" data-tab="needs-approval" sec:authorize="hasRole('APPROVER')">Needs Approval</button>
         <button class="tab-btn" data-tab="user-admin" sec:authorize="hasRole('ADMIN')">User Admin</button>
         <button class="tab-btn" data-tab="needs-prices" sec:authorize="hasRole('STOCK_CONTROLLER')">Needs Prices</button>
         <button class="tab-btn" data-tab="pending-orders" sec:authorize="hasRole('STOCK_CONTROLLER')">Packing Orders</button>
@@ -922,6 +937,14 @@
             </div>
         </div>
 
+        <div id="panel-needs-approval" class="tab-panel" sec:authorize="hasRole('APPROVER')">
+            <div id="needs-approval-orders"
+                 hx-get="/approver/orders"
+                 hx-trigger="tab-activated"
+                 hx-swap="innerHTML">
+            </div>
+        </div>
+
         <div id="panel-needs-prices" class="tab-panel" sec:authorize="hasRole('STOCK_CONTROLLER')">
             <div id="needs-prices-orders"
                  hx-get="/stock/needs-prices"
@@ -971,6 +994,10 @@
             if (tabName === 'orders') {
                 const orderList = document.getElementById('order-list');
                 if (orderList) htmx.trigger(orderList, 'tab-activated');
+            }
+            if (tabName === 'needs-approval') {
+                const needsApproval = document.getElementById('needs-approval-orders');
+                if (needsApproval) htmx.trigger(needsApproval, 'tab-activated');
             }
             if (tabName === 'needs-prices') {
                 const needsPrices = document.getElementById('needs-prices-orders');

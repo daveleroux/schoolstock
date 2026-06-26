@@ -5,6 +5,7 @@ import org.schoolstock.schoolstock.repository.CartItemRepository;
 import org.schoolstock.schoolstock.repository.OrderRepository;
 import org.schoolstock.schoolstock.repository.SubOrderItemRepository;
 import org.schoolstock.schoolstock.repository.SubOrderRepository;
+import org.schoolstock.schoolstock.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,15 +25,18 @@ public class OrderService {
     private final CartItemRepository cartItemRepository;
     private final SubOrderRepository subOrderRepository;
     private final SubOrderItemRepository subOrderItemRepository;
+    private final UserRepository userRepository;
 
     public OrderService(OrderRepository orderRepository,
                         CartItemRepository cartItemRepository,
                         SubOrderRepository subOrderRepository,
-                        SubOrderItemRepository subOrderItemRepository) {
+                        SubOrderItemRepository subOrderItemRepository,
+                        UserRepository userRepository) {
         this.orderRepository = orderRepository;
         this.cartItemRepository = cartItemRepository;
         this.subOrderRepository = subOrderRepository;
         this.subOrderItemRepository = subOrderItemRepository;
+        this.userRepository = userRepository;
     }
 
     @Transactional(readOnly = true)
@@ -59,6 +63,22 @@ public class OrderService {
     @Transactional(readOnly = true)
     public List<Order> getNeedsPricesOrders() {
         return orderRepository.findOrdersWithSubOrderInState(SubOrderState.NEEDS_PRICES);
+    }
+
+    @Transactional(readOnly = true)
+    public List<Order> getOrdersNeedingApprovalFor(User approver) {
+        List<User> orderers = userRepository.findByApproversContaining(approver);
+        if (orderers.isEmpty()) return List.of();
+        return orderRepository.findOrdersForOrderersWithSubOrderInState(orderers, SubOrderState.NEEDS_APPROVAL);
+    }
+
+    public void approveSubOrder(Long subOrderId) {
+        SubOrder subOrder = subOrderRepository.findById(subOrderId)
+                .orElseThrow(() -> new IllegalArgumentException("Sub-order not found: " + subOrderId));
+        if (!subOrder.getState().canTransitionTo(SubOrderState.PACKING)) {
+            throw new IllegalStateException("Cannot approve sub-order in state: " + subOrder.getState());
+        }
+        subOrder.setState(SubOrderState.PACKING);
     }
 
     public void saveEstimatedPrice(Long subOrderItemId, BigDecimal price) {
