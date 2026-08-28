@@ -62,7 +62,7 @@
                         <td class="col-qty" th:text="${soi.quantity}"></td>
                         <td th:if="${sub.state.name() == 'NEEDS_APPROVAL'}"
                             class="col-price"
-                            th:text="${soi.estimatedPrice != null ? soi.estimatedPrice : '—'}">
+                            th:text="${soi.item.estimatedPrice != null ? soi.item.estimatedPrice : '—'}">
                         </td>
                     </tr>
                 </tbody>

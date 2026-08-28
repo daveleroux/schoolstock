@@ -786,22 +786,6 @@
 
         .btn-save-price:hover { background-color: #e2e8f0; }
 
-        .btn-capture-prices {
-            padding: 0.25rem 0.7rem;
-            background-color: #ebf8ff;
-            color: #2b6cb0;
-            border: 1px solid #bee3f8;
-            border-radius: 6px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background-color 0.15s;
-        }
-
-        .btn-capture-prices:hover { background-color: #bee3f8; }
-
-        .row-price-missing td { background-color: #fffbeb; }
-
         /* ── Order header with creator ───────────────────── */
         .order-header-left {
             display: flex;
@@ -946,7 +930,7 @@
         </div>
 
         <div id="panel-needs-prices" class="tab-panel" sec:authorize="hasRole('STOCK_CONTROLLER')">
-            <div id="needs-prices-orders"
+            <div id="needs-prices-items"
                  hx-get="/stock/needs-prices"
                  hx-trigger="tab-activated"
                  hx-swap="innerHTML">
@@ -1000,7 +984,7 @@
                 if (needsApproval) htmx.trigger(needsApproval, 'tab-activated');
             }
             if (tabName === 'needs-prices') {
-                const needsPrices = document.getElementById('needs-prices-orders');
+                const needsPrices = document.getElementById('needs-prices-items');
                 if (needsPrices) htmx.trigger(needsPrices, 'tab-activated');
             }
             if (tabName === 'pending-orders') {

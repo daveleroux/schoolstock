@@ -5,6 +5,8 @@ import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.PositiveOrZero;
 
+import java.math.BigDecimal;
+
 @Entity
 @Table(name = "items")
 public class Item {
@@ -30,6 +32,9 @@ public class Item {
     @PositiveOrZero
     @Column(nullable = false)
     private int availableStock = 0;
+
+    @Column(precision = 10, scale = 2)
+    private BigDecimal estimatedPrice;
 
     public Item() {}
 
@@ -82,5 +87,16 @@ public class Item {
 
     public void setAvailableStock(int availableStock) {
         this.availableStock = availableStock;
+    }
+
+    public BigDecimal getEstimatedPrice() {
+        return estimatedPrice;
+    }
+
+    public void setEstimatedPrice(BigDecimal estimatedPrice) {
+        if (this.estimatedPrice != null && estimatedPrice == null) {
+            throw new IllegalArgumentException("Cannot clear an estimated price once it has been captured.");
+        }
+        this.estimatedPrice = estimatedPrice;
     }
 }

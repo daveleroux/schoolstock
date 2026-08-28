@@ -2,6 +2,7 @@ package org.schoolstock.schoolstock.service;
 
 import org.schoolstock.schoolstock.model.*;
 import org.schoolstock.schoolstock.repository.CartItemRepository;
+import org.schoolstock.schoolstock.repository.ItemRepository;
 import org.schoolstock.schoolstock.repository.OrderRepository;
 import org.schoolstock.schoolstock.repository.SubOrderItemRepository;
 import org.schoolstock.schoolstock.repository.SubOrderRepository;
@@ -25,17 +26,20 @@ public class OrderService {
     private final CartItemRepository cartItemRepository;
     private final SubOrderRepository subOrderRepository;
     private final SubOrderItemRepository subOrderItemRepository;
+    private final ItemRepository itemRepository;
     private final UserRepository userRepository;
 
     public OrderService(OrderRepository orderRepository,
                         CartItemRepository cartItemRepository,
                         SubOrderRepository subOrderRepository,
                         SubOrderItemRepository subOrderItemRepository,
+                        ItemRepository itemRepository,
                         UserRepository userRepository) {
         this.orderRepository = orderRepository;
         this.cartItemRepository = cartItemRepository;
         this.subOrderRepository = subOrderRepository;
         this.subOrderItemRepository = subOrderItemRepository;
+        this.itemRepository = itemRepository;
         this.userRepository = userRepository;
     }
 
@@ -61,8 +65,8 @@ public class OrderService {
     }
 
     @Transactional(readOnly = true)
-    public List<Order> getNeedsPricesOrders() {
-        return orderRepository.findOrdersWithSubOrderInState(SubOrderState.NEEDS_PRICES);
+    public List<Item> getItemsNeedingPrices() {
+        return subOrderItemRepository.findDistinctItemsWithNullPriceInState(SubOrderState.NEEDS_PRICES);
     }
 
     @Transactional(readOnly = true)
@@ -81,24 +85,22 @@ public class OrderService {
         subOrder.setState(SubOrderState.PACKING);
     }
 
-    public void saveEstimatedPrice(Long subOrderItemId, BigDecimal price) {
-        SubOrderItem soi = subOrderItemRepository.findById(subOrderItemId)
-                .orElseThrow(() -> new IllegalArgumentException("Sub-order item not found: " + subOrderItemId));
-        soi.setEstimatedPrice(price.setScale(2, RoundingMode.HALF_UP));
+    public void saveEstimatedPrice(Long itemId, BigDecimal price) {
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new IllegalArgumentException("Item not found: " + itemId));
+        item.setEstimatedPrice(price.setScale(2, RoundingMode.HALF_UP));
+
+        List<SubOrder> affected = subOrderRepository.findByStateContainingItem(SubOrderState.NEEDS_PRICES, item);
+        for (SubOrder subOrder : affected) {
+            if (allPricesCaptured(subOrder)) {
+                subOrder.setState(SubOrderState.NEEDS_APPROVAL);
+            }
+        }
     }
 
-    public void captureSubOrderPrices(Long subOrderId) {
-        SubOrder subOrder = subOrderRepository.findById(subOrderId)
-                .orElseThrow(() -> new IllegalArgumentException("Sub-order not found: " + subOrderId));
-        if (subOrder.getState() != SubOrderState.NEEDS_PRICES) {
-            throw new IllegalStateException("Sub-order is not in the Needs Prices state.");
-        }
-        boolean allCaptured = subOrder.getItems().stream()
-                .allMatch(soi -> soi.getEstimatedPrice() != null);
-        if (!allCaptured) {
-            throw new IllegalStateException("Not all item prices have been captured.");
-        }
-        subOrder.setState(SubOrderState.NEEDS_APPROVAL);
+    private boolean allPricesCaptured(SubOrder subOrder) {
+        return subOrder.getItems().stream()
+                .allMatch(soi -> soi.getItem().getEstimatedPrice() != null);
     }
 
     public void deliverSubOrder(Long subOrderId) {
@@ -179,7 +181,9 @@ public class OrderService {
         }
 
         if (!needsPricesItems.isEmpty()) {
-            SubOrder sub = new SubOrder(order, SubOrderState.NEEDS_PRICES, seq);
+            boolean allAlreadyPriced = needsPricesItems.stream()
+                    .allMatch(soi -> soi.getItem().getEstimatedPrice() != null);
+            SubOrder sub = new SubOrder(order, allAlreadyPriced ? SubOrderState.NEEDS_APPROVAL : SubOrderState.NEEDS_PRICES, seq);
             for (SubOrderItem soi : needsPricesItems) {
                 soi.setSubOrder(sub);
                 sub.getItems().add(soi);

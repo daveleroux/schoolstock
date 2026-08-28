@@ -31,11 +31,11 @@ public class StockController {
 
     @GetMapping("/needs-prices")
     public String needsPrices(Model model) {
-        model.addAttribute("orders", orderService.getNeedsPricesOrders());
-        return "fragments/needs-prices-orders :: needs-prices-orders";
+        model.addAttribute("items", orderService.getItemsNeedingPrices());
+        return "fragments/needs-prices-items :: needs-prices-items";
     }
 
-    @PostMapping("/sub-order-items/{id}/price")
+    @PostMapping("/items/{id}/price")
     public String savePrice(@PathVariable Long id,
                             @RequestParam String price,
                             Model model) {
@@ -44,19 +44,8 @@ public class StockController {
         } catch (NumberFormatException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid price value.");
         }
-        model.addAttribute("orders", orderService.getNeedsPricesOrders());
-        return "fragments/needs-prices-orders :: needs-prices-orders";
-    }
-
-    @PostMapping("/sub-orders/{id}/capture-prices")
-    public String capturePrices(@PathVariable Long id, Model model) {
-        try {
-            orderService.captureSubOrderPrices(id);
-        } catch (IllegalStateException e) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
-        }
-        model.addAttribute("orders", orderService.getNeedsPricesOrders());
-        return "fragments/needs-prices-orders :: needs-prices-orders";
+        model.addAttribute("items", orderService.getItemsNeedingPrices());
+        return "fragments/needs-prices-items :: needs-prices-items";
     }
 
     @PostMapping("/sub-orders/{id}/deliver")

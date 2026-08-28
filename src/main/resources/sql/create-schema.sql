@@ -24,13 +24,9 @@ CREATE TABLE IF NOT EXISTS items (
     stock_quantity  INTEGER      NOT NULL DEFAULT 0 CHECK (stock_quantity >= 0),
     available_stock INTEGER      NOT NULL DEFAULT 0 CHECK (available_stock >= 0),
     provisional     BOOLEAN      NOT NULL DEFAULT FALSE,
+    estimated_price NUMERIC(10,2),
     search_vector   TSVECTOR
 );
-
--- Migration helper: set available_stock = stock_quantity for rows that were
--- inserted before this column existed (safe to re-run; only touches rows where
--- they differ and no sub-orders have already reserved stock).
--- UPDATE items SET available_stock = stock_quantity WHERE available_stock = 0 AND stock_quantity > 0;
 
 -- orderer_approvers -------------------------------------------
 CREATE TABLE IF NOT EXISTS orderer_approvers (
@@ -71,8 +67,7 @@ CREATE TABLE IF NOT EXISTS sub_order_items (
     id              BIGSERIAL    PRIMARY KEY,
     sub_order_id    BIGINT       NOT NULL REFERENCES sub_orders(id) ON DELETE CASCADE,
     item_id         BIGINT       NOT NULL REFERENCES items(id),
-    quantity        INTEGER      NOT NULL CHECK (quantity > 0),
-    estimated_price NUMERIC(10,2)
+    quantity        INTEGER      NOT NULL CHECK (quantity > 0)
 );
 
 -- GIN index for full-text search on items

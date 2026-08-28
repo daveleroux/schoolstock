@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="needs-prices-items">
+
+    <p th:if="${#lists.isEmpty(items)}" class="empty-msg">No items awaiting prices.</p>
+
+    <table th:if="${!#lists.isEmpty(items)}" class="sub-order-items-table">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th class="col-price">Est. Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="item : ${items}">
+                <td>
+                    <span th:text="${item.name}"></span>
+                    <span th:if="${item.provisional}" class="badge-provisional">Provisional</span>
+                </td>
+                <td class="col-price">
+                    <form th:attr="hx-post='/stock/items/' + ${item.id} + '/price'"
+                          hx-target="#needs-prices-items"
+                          hx-swap="innerHTML"
+                          class="price-form">
+                        <input type="number"
+                               name="price"
+                               step="0.01"
+                               min="0.01"
+                               placeholder="0.00"
+                               class="price-input"
+                               required>
+                        <button type="submit" class="btn-save-price">Save</button>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+</div>
+
+</body>
+</html>
