@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="stock-item-results">
+    <p th:if="${#lists.isEmpty(items)}" class="empty-msg">No results found.</p>
+
+    <div th:each="item : ${items}" class="stock-item-block">
+        <div class="item-row">
+            <div class="item-info">
+                <span class="item-name">
+                    <span th:text="${item.name}">Name</span>
+                    <span th:if="${item.provisional}" class="badge-provisional">Provisional</span>
+                </span>
+                <span class="item-desc" th:text="${item.description}">Description</span>
+                <span class="item-stock"
+                      th:text="'Stock: ' + ${item.stockQuantity} + ' · Available: ' + ${item.availableStock}">
+                    Stock: 0 · Available: 0
+                </span>
+                <span th:if="${item.estimatedPrice != null}" class="item-price" th:text="'Est. price: ' + ${item.estimatedPrice}">Est. price: 0.00</span>
+            </div>
+            <div class="item-actions">
+                <button type="button" class="btn-edit-details"
+                        th:onclick="'toggleStockForm(\'edit-' + ${item.id} + '\')'">Edit Details</button>
+                <button type="button" class="btn-stock-bought"
+                        th:onclick="'toggleStockForm(\'bought-' + ${item.id} + '\')'">Stock Bought</button>
+                <button type="button" class="btn-adjust-up"
+                        th:onclick="'toggleStockForm(\'up-' + ${item.id} + '\')'">Adjust Stock Up</button>
+                <button type="button" class="btn-adjust-down"
+                        th:onclick="'toggleStockForm(\'down-' + ${item.id} + '\')'">Adjust Stock Down</button>
+            </div>
+        </div>
+
+        <form th:id="'edit-' + ${item.id}" class="stock-inline-form"
+              th:attr="hx-post='/stock/items/' + ${item.id} + '/edit'"
+              hx-target="#stock-search-results"
+              hx-swap="innerHTML">
+            <input type="text" name="name" th:value="${item.name}" placeholder="Item name" required>
+            <input type="text" name="description" th:value="${item.description}" placeholder="Description">
+            <button type="submit" class="btn-save-price">Save</button>
+        </form>
+
+        <form th:id="'bought-' + ${item.id}" class="stock-inline-form"
+              th:attr="hx-post='/stock/items/' + ${item.id} + '/stock-bought'"
+              hx-target="#stock-search-results"
+              hx-swap="innerHTML">
+            <input type="number" name="price" step="0.01" min="0.01" placeholder="Price paid" required>
+            <input type="number" name="quantity" min="1" placeholder="Quantity" required>
+            <button type="submit" class="btn-save-price">Confirm Purchase</button>
+        </form>
+
+        <form th:id="'up-' + ${item.id}" class="stock-inline-form"
+              th:attr="hx-post='/stock/items/' + ${item.id} + '/stock-adjust-up'"
+              hx-target="#stock-search-results"
+              hx-swap="innerHTML">
+            <input type="number" name="quantity" min="1" placeholder="Quantity" required>
+            <button type="submit" class="btn-save-price">Confirm Increase</button>
+        </form>
+
+        <form th:id="'down-' + ${item.id}" class="stock-inline-form"
+              th:attr="hx-post='/stock/items/' + ${item.id} + '/stock-adjust-down'"
+              hx-target="#stock-search-results"
+              hx-swap="innerHTML">
+            <input type="number" name="quantity" min="1" placeholder="Quantity" required>
+            <button type="submit" class="btn-save-price">Confirm Reduction</button>
+        </form>
+    </div>
+</div>
+</body>
+</html>

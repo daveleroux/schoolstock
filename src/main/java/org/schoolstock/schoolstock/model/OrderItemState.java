@@ -10,13 +10,13 @@ public enum OrderItemState {
         @Override public Set<OrderItemState> validTransitions() { return Set.of(NEEDS_APPROVAL, CANCELLED); }
     },
     NEEDS_APPROVAL {
-        @Override public Set<OrderItemState> validTransitions() { return Set.of(AWAITING_STOCK, CANCELLED); }
+        @Override public Set<OrderItemState> validTransitions() { return Set.of(AWAITING_STOCK, PACKING, CANCELLED); }
     },
     AWAITING_STOCK {
         @Override public Set<OrderItemState> validTransitions() { return Set.of(PACKING, CANCELLED); }
     },
     PACKING {
-        @Override public Set<OrderItemState> validTransitions() { return Set.of(DELIVERED, CANCELLED); }
+        @Override public Set<OrderItemState> validTransitions() { return Set.of(DELIVERED, CANCELLED, NEEDS_APPROVAL); }
     },
     CANCELLED {
         @Override public Set<OrderItemState> validTransitions() { return Set.of(); }

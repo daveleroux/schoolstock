@@ -118,6 +118,111 @@
 
         .item-price { font-size: 0.8rem; color: #a0aec0; }
 
+        /* ── Stock tab ────────────────────────────────── */
+        .stock-item-block {
+            border-bottom: 1px solid #edf2f7;
+            padding-bottom: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stock-item-block .item-row {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .stock-inline-form {
+            display: none;
+            gap: 0.5rem;
+            align-items: center;
+            padding: 0.6rem 0.75rem;
+            margin-top: 0.4rem;
+            background-color: #f7fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+
+        .stock-inline-form input {
+            padding: 0.35rem 0.55rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: #2d3748;
+            background-color: #fff;
+        }
+
+        .stock-inline-form input[name="name"] { flex: 1; min-width: 8rem; }
+
+        .stock-inline-form input[name="description"] { flex: 2; min-width: 10rem; }
+
+        .stock-inline-form input[name="price"],
+        .stock-inline-form input[name="quantity"] { width: 7rem; }
+
+        /* Action buttons are solid, pill-shaped, with a lifted hover — kept
+           visually distinct from the flat, pastel, uppercase tags above. */
+        .btn-edit-details {
+            padding: 0.3rem 0.8rem;
+            background-color: #718096;
+            color: #ffffff;
+            border: none;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+            transition: background-color 0.15s, transform 0.15s;
+        }
+
+        .btn-edit-details:hover { background-color: #4a5568; transform: translateY(-1px); }
+
+        .btn-stock-bought {
+            padding: 0.3rem 0.8rem;
+            background-color: #38a169;
+            color: #ffffff;
+            border: none;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+            transition: background-color 0.15s, transform 0.15s;
+        }
+
+        .btn-stock-bought:hover { background-color: #2f855a; transform: translateY(-1px); }
+
+        .btn-adjust-up {
+            padding: 0.3rem 0.8rem;
+            background-color: #3182ce;
+            color: #ffffff;
+            border: none;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+            transition: background-color 0.15s, transform 0.15s;
+        }
+
+        .btn-adjust-up:hover { background-color: #2b6cb0; transform: translateY(-1px); }
+
+        .btn-adjust-down {
+            padding: 0.3rem 0.8rem;
+            background-color: #dd6b20;
+            color: #ffffff;
+            border: none;
+            border-radius: 999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+            transition: background-color 0.15s, transform 0.15s;
+        }
+
+        .btn-adjust-down:hover { background-color: #c05621; transform: translateY(-1px); }
+
         .badge-provisional {
             display: inline-block;
             padding: 0.1rem 0.45rem;
@@ -125,11 +230,13 @@
             border: 1px solid #f6e05e;
             color: #744210;
             border-radius: 4px;
-            font-size: 0.7rem;
+            font-size: 0.68rem;
             font-weight: 700;
             vertical-align: middle;
             margin-left: 0.4rem;
-            letter-spacing: 0.02em;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            cursor: default;
         }
 
         /* ── Request new item ────────────────────────── */
@@ -630,13 +737,17 @@
         }
 
         /* ── State badges ────────────────────────────── */
+        /* Tags are flat, pastel, uppercase labels — never clickable — kept
+           visually distinct from the solid, pill-shaped action buttons below. */
         .state-badge {
             display: inline-block;
             padding: 0.15rem 0.55rem;
             border-radius: 4px;
-            font-size: 0.75rem;
+            font-size: 0.72rem;
             font-weight: 700;
-            letter-spacing: 0.02em;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            cursor: default;
         }
 
         .state-needs-prices   { background-color: #fffbeb; border: 1px solid #fbd38d; color: #744210; }
@@ -675,19 +786,22 @@
         }
 
         /* ── Cancel order item button ────────────────── */
+        /* Solid, pill-shaped, matching the other row-action buttons — kept
+           visually distinct from the flat, pastel, uppercase state tags. */
         .btn-cancel-item {
-            padding: 0.25rem 0.7rem;
-            background-color: #fff5f5;
-            color: #c53030;
-            border: 1px solid #fed7d7;
-            border-radius: 6px;
+            padding: 0.3rem 0.8rem;
+            background-color: #e53e3e;
+            color: #ffffff;
+            border: none;
+            border-radius: 999px;
             font-size: 0.8rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.15s;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+            transition: background-color 0.15s, transform 0.15s;
         }
 
-        .btn-cancel-item:hover { background-color: #fed7d7; }
+        .btn-cancel-item:hover { background-color: #c53030; transform: translateY(-1px); }
 
         /* ── Order item action buttons (approver / stock controller) ── */
         .item-actions {
@@ -696,32 +810,34 @@
         }
 
         .btn-deliver {
-            padding: 0.25rem 0.7rem;
-            background-color: #f0fff4;
-            color: #276749;
-            border: 1px solid #c6f6d5;
-            border-radius: 6px;
+            padding: 0.3rem 0.8rem;
+            background-color: #38a169;
+            color: #ffffff;
+            border: none;
+            border-radius: 999px;
             font-size: 0.8rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.15s;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+            transition: background-color 0.15s, transform 0.15s;
         }
 
-        .btn-deliver:hover { background-color: #c6f6d5; }
+        .btn-deliver:hover { background-color: #2f855a; transform: translateY(-1px); }
 
         .btn-approve {
-            padding: 0.25rem 0.7rem;
-            background-color: #f0fff4;
-            color: #276749;
-            border: 1px solid #c6f6d5;
-            border-radius: 6px;
+            padding: 0.3rem 0.8rem;
+            background-color: #38a169;
+            color: #ffffff;
+            border: none;
+            border-radius: 999px;
             font-size: 0.8rem;
             font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.15s;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+            transition: background-color 0.15s, transform 0.15s;
         }
 
-        .btn-approve:hover { background-color: #c6f6d5; }
+        .btn-approve:hover { background-color: #2f855a; transform: translateY(-1px); }
 
         /* ── Needs Prices ────────────────────────────── */
         .col-price { width: 12rem; text-align: right; }
@@ -752,19 +868,20 @@
         }
 
         .btn-save-price {
-            padding: 0.2rem 0.55rem;
-            background-color: #edf2f7;
-            color: #4a5568;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
+            padding: 0.25rem 0.65rem;
+            background-color: #3182ce;
+            color: #ffffff;
+            border: none;
+            border-radius: 999px;
             font-size: 0.78rem;
             font-weight: 600;
             cursor: pointer;
             white-space: nowrap;
-            transition: background-color 0.15s;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+            transition: background-color 0.15s, transform 0.15s;
         }
 
-        .btn-save-price:hover { background-color: #e2e8f0; }
+        .btn-save-price:hover { background-color: #2b6cb0; transform: translateY(-1px); }
 
         /* ── Order header with creator ───────────────────── */
         .order-header-left {
@@ -792,6 +909,7 @@
         <button class="tab-btn" data-tab="orders" sec:authorize="hasRole('ORDERER')">Orders</button>
         <button class="tab-btn" data-tab="needs-approval" sec:authorize="hasRole('APPROVER')">Needs Approval</button>
         <button class="tab-btn" data-tab="user-admin" sec:authorize="hasRole('ADMIN')">User Admin</button>
+        <button class="tab-btn" data-tab="stock" sec:authorize="hasRole('STOCK_CONTROLLER')">Stock</button>
         <button class="tab-btn" data-tab="needs-prices" sec:authorize="hasRole('STOCK_CONTROLLER')">Needs Prices</button>
         <button class="tab-btn" data-tab="pending-orders" sec:authorize="hasRole('STOCK_CONTROLLER')">Packing Orders</button>
         <button class="tab-btn tab-cart" data-tab="cart" sec:authorize="hasRole('ORDERER')">
@@ -910,6 +1028,46 @@
             </div>
         </div>
 
+        <div id="panel-stock" class="tab-panel" sec:authorize="hasRole('STOCK_CONTROLLER')">
+            <div class="search-bar">
+                <input id="stock-item-search-input"
+                       type="search"
+                       name="q"
+                       placeholder="Search items..."
+                       hx-get="/stock/items/search"
+                       hx-trigger="input changed delay:300ms, tab-activated"
+                       hx-target="#stock-search-results"
+                       hx-swap="innerHTML"
+                       autocomplete="off">
+                <button type="button" class="btn-request"
+                        onclick="document.getElementById('add-item-form-container').style.display='block'; this.style.display='none'">
+                    + Add New Item
+                </button>
+            </div>
+
+            <div id="add-item-form-container" class="request-form-container">
+                <h3>Add New Item</h3>
+                <form hx-post="/stock/items"
+                      hx-target="#stock-search-results"
+                      hx-swap="innerHTML"
+                      hx-on:htmx:after-request="if(event.detail.successful){ this.reset(); document.getElementById('add-item-form-container').style.display='none'; document.querySelector('#panel-stock .btn-request').style.display=''; }">
+                    <div class="form-row">
+                        <input type="text" name="name" placeholder="Item name" required>
+                        <input type="text" name="description" placeholder="Description (optional)">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-submit-request">Add Item</button>
+                        <button type="button" class="btn-cancel-request"
+                                onclick="document.getElementById('add-item-form-container').style.display='none'; document.querySelector('#panel-stock .btn-request').style.display=''">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div id="stock-search-results"></div>
+        </div>
+
         <div id="panel-needs-prices" class="tab-panel" sec:authorize="hasRole('STOCK_CONTROLLER')">
             <div id="needs-prices-items"
                  hx-get="/stock/needs-prices"
@@ -964,6 +1122,10 @@
                 const needsApproval = document.getElementById('needs-approval-orders');
                 if (needsApproval) htmx.trigger(needsApproval, 'tab-activated');
             }
+            if (tabName === 'stock') {
+                const input = document.getElementById('stock-item-search-input');
+                if (input) htmx.trigger(input, 'tab-activated');
+            }
             if (tabName === 'needs-prices') {
                 const needsPrices = document.getElementById('needs-prices-items');
                 if (needsPrices) htmx.trigger(needsPrices, 'tab-activated');
@@ -1002,6 +1164,14 @@
 
             activateTab(window.location.hash.slice(1) || DEFAULT_TAB);
         });
+
+        // Toggle an inline stock-management form (Edit Details / Stock Bought /
+        // Adjust Stock Down) open or closed.
+        function toggleStockForm(id) {
+            const form = document.getElementById(id);
+            if (!form) return;
+            form.style.display = (form.style.display === 'flex') ? 'none' : 'flex';
+        }
 
         // Toast notifications
         function showToast(message, type = 'error') {

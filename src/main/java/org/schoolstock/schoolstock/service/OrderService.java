@@ -71,24 +71,175 @@ public class OrderService {
         return orderRepository.findOrdersForOrderersWithItemInState(orderers, OrderItemState.NEEDS_APPROVAL);
     }
 
+    /**
+     * Approves a NEEDS_APPROVAL order item. If the item currently has free
+     * (available) stock, the approved quantity is fulfilled straight from it and
+     * moves directly to PACKING — split across two order items if only part of
+     * the quantity can be covered. Any portion that can't be covered by available
+     * stock moves to AWAITING_STOCK, to be fulfilled later by a stock purchase.
+     */
     public void approveOrderItem(Long orderItemId) {
         OrderItem orderItem = orderItemRepository.findById(orderItemId)
                 .orElseThrow(() -> new IllegalArgumentException("Order item not found: " + orderItemId));
-        if (!orderItem.getState().canTransitionTo(OrderItemState.AWAITING_STOCK)) {
+        if (orderItem.getState() != OrderItemState.NEEDS_APPROVAL) {
             throw new IllegalStateException("Cannot approve order item in state: " + orderItem.getState());
         }
-        orderItem.setState(OrderItemState.AWAITING_STOCK);
+
+        Item item = orderItem.getItem();
+        int covered = Math.min(item.getAvailableStock(), orderItem.getQuantity());
+        if (covered > 0) {
+            item.setAvailableStock(item.getAvailableStock() - covered);
+            moveQuantityToState(orderItem, covered, OrderItemState.PACKING);
+        }
+        if (orderItem.getState() == OrderItemState.NEEDS_APPROVAL) {
+            // Nothing, or not everything, could be covered by available stock.
+            orderItem.setState(OrderItemState.AWAITING_STOCK);
+        }
     }
 
     public void saveEstimatedPrice(Long itemId, BigDecimal price) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("Item not found: " + itemId));
         item.setEstimatedPrice(price.setScale(2, RoundingMode.HALF_UP));
+        moveNeedsPricesToApproval(item);
+    }
 
-        List<OrderItem> affected = orderItemRepository.findByStateAndItem(OrderItemState.NEEDS_PRICES, item);
-        for (OrderItem orderItem : affected) {
+    /**
+     * Moves every NEEDS_PRICES order item for the given item into NEEDS_APPROVAL.
+     * Called whenever the item's estimated price is set or updated, since a price
+     * is exactly what a NEEDS_PRICES order item is waiting on.
+     */
+    private void moveNeedsPricesToApproval(Item item) {
+        for (OrderItem orderItem : orderItemRepository.findByStateAndItem(OrderItemState.NEEDS_PRICES, item)) {
             orderItem.setState(OrderItemState.NEEDS_APPROVAL);
         }
+    }
+
+    /**
+     * Records a stock purchase for an item: increases its total stock and sets
+     * its estimated price to the price paid. Any order items currently
+     * AWAITING_STOCK for this item are then moved into PACKING on a first-come
+     * first-served basis (oldest order first), splitting an order item if the
+     * purchased quantity only partially covers it. Any purchased quantity left
+     * over after clearing the backlog becomes newly available stock.
+     */
+    public void recordStockPurchase(Long itemId, BigDecimal price, int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be positive.");
+        }
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new IllegalArgumentException("Item not found: " + itemId));
+        item.setEstimatedPrice(price.setScale(2, RoundingMode.HALF_UP));
+        moveNeedsPricesToApproval(item);
+        increaseStock(item, quantity);
+    }
+
+    /**
+     * Adjusts an item's stock upward without recording a price, typically used
+     * for stock take-on. Behaves exactly like {@link #recordStockPurchase} in
+     * every other respect: it does not touch the estimated price, so it does
+     * not move any NEEDS_PRICES order items forward.
+     */
+    public void adjustStockUp(Long itemId, int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be positive.");
+        }
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new IllegalArgumentException("Item not found: " + itemId));
+        increaseStock(item, quantity);
+    }
+
+    /**
+     * Increases an item's total stock by {@code quantity}. Any order items
+     * currently AWAITING_STOCK for this item are then moved into PACKING on a
+     * first-come first-served basis (oldest order first), splitting an order
+     * item if the added quantity only partially covers it. Any added quantity
+     * left over after clearing the backlog becomes newly available stock.
+     */
+    private void increaseStock(Item item, int quantity) {
+        item.setStockQuantity(item.getStockQuantity() + quantity);
+
+        int remaining = quantity;
+        for (OrderItem waiting : orderItemRepository.findByStateAndItemOldestFirst(OrderItemState.AWAITING_STOCK, item)) {
+            if (remaining <= 0) break;
+            remaining = moveQuantityToState(waiting, remaining, OrderItemState.PACKING);
+        }
+        if (remaining > 0) {
+            item.setAvailableStock(item.getAvailableStock() + remaining);
+        }
+    }
+
+    /**
+     * Reduces an item's total stock. The reduction is first taken out of free
+     * (available) stock; if that isn't enough, already-reserved PACKING order
+     * items are pulled back to NEEDS_APPROVAL to free up the shortfall, with the
+     * most recently created orders affected first, splitting an order item if
+     * only part of its quantity needs to be reclaimed.
+     */
+    public void adjustStockDown(Long itemId, int quantity) {
+        if (quantity <= 0) {
+            throw new IllegalArgumentException("Quantity must be positive.");
+        }
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new IllegalArgumentException("Item not found: " + itemId));
+        if (quantity > item.getStockQuantity()) {
+            throw new IllegalStateException("Cannot reduce stock below zero.");
+        }
+
+        int fromAvailable = Math.min(quantity, item.getAvailableStock());
+        item.setAvailableStock(item.getAvailableStock() - fromAvailable);
+
+        int remaining = quantity - fromAvailable;
+        for (OrderItem packing : orderItemRepository.findByStateAndItemNewestFirst(OrderItemState.PACKING, item)) {
+            if (remaining <= 0) break;
+            remaining = moveQuantityToState(packing, remaining, OrderItemState.NEEDS_APPROVAL);
+        }
+        if (remaining > 0) {
+            throw new IllegalStateException("Not enough reserved stock to cover this reduction.");
+        }
+
+        item.setStockQuantity(item.getStockQuantity() - quantity);
+    }
+
+    /**
+     * Moves up to {@code qty} units of {@code orderItem} into {@code targetState}.
+     * If {@code qty} covers the order item's full quantity, the order item itself
+     * transitions. Otherwise, the order item is split: a new order item for the
+     * moved quantity is created in {@code targetState}, and the original order
+     * item's quantity is reduced by that amount (its state is left unchanged).
+     * Returns the portion of {@code qty} that could not be applied — always 0
+     * unless the order item's quantity was smaller than {@code qty}.
+     */
+    private int moveQuantityToState(OrderItem orderItem, int qty, OrderItemState targetState) {
+        if (!orderItem.getState().canTransitionTo(targetState)) {
+            throw new IllegalStateException(
+                    "Cannot move order item from " + orderItem.getState() + " to " + targetState);
+        }
+        if (qty >= orderItem.getQuantity()) {
+            int consumed = orderItem.getQuantity();
+            orderItem.setState(targetState);
+            return qty - consumed;
+        }
+        OrderItem moved = new OrderItem(orderItem.getOrder(), orderItem.getItem(), qty, targetState);
+        orderItem.getOrder().getItems().add(moved);
+        orderItemRepository.save(moved);
+        orderItem.setQuantity(orderItem.getQuantity() - qty);
+        return 0;
+    }
+
+    public Item createItem(String name, String description) {
+        Item item = new Item();
+        item.setName(name);
+        item.setDescription(description);
+        item.setProvisional(false);
+        return itemRepository.save(item);
+    }
+
+    public void updateItemDetails(Long itemId, String name, String description) {
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new IllegalArgumentException("Item not found: " + itemId));
+        item.setName(name);
+        item.setDescription(description);
     }
 
     public void deliverOrderItem(Long orderItemId) {
