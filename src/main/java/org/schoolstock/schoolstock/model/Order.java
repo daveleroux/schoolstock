@@ -22,8 +22,8 @@ public class Order {
     private User createdBy;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
-    @OrderBy("sequenceNumber ASC")
-    private List<SubOrder> subOrders = new ArrayList<>();
+    @OrderBy("id ASC")
+    private List<OrderItem> items = new ArrayList<>();
 
     public Order() {}
 
@@ -42,5 +42,5 @@ public class Order {
 
     public void setCreatedBy(User createdBy) { this.createdBy = createdBy; }
 
-    public List<SubOrder> getSubOrders() { return subOrders; }
+    public List<OrderItem> getItems() { return items; }
 }

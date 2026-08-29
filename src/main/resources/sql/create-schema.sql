@@ -51,24 +51,17 @@ CREATE TABLE IF NOT EXISTS orders (
     user_id    BIGINT      NOT NULL REFERENCES users(id)
 );
 
--- sub_orders ---------------------------------------------------
-CREATE TABLE IF NOT EXISTS sub_orders (
-    id              BIGSERIAL   PRIMARY KEY,
-    order_id        BIGINT      NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
-    state           VARCHAR(50) NOT NULL,
-    version         BIGINT      NOT NULL DEFAULT 0,
-    sequence_number INTEGER     NOT NULL
-);
-
-CREATE INDEX IF NOT EXISTS idx_sub_orders_state ON sub_orders(state);
-
--- sub_order_items ----------------------------------------------
-CREATE TABLE IF NOT EXISTS sub_order_items (
+-- order_items ----------------------------------------------
+CREATE TABLE IF NOT EXISTS order_items (
     id              BIGSERIAL    PRIMARY KEY,
-    sub_order_id    BIGINT       NOT NULL REFERENCES sub_orders(id) ON DELETE CASCADE,
+    order_id        BIGINT       NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
     item_id         BIGINT       NOT NULL REFERENCES items(id),
-    quantity        INTEGER      NOT NULL CHECK (quantity > 0)
+    quantity        INTEGER      NOT NULL CHECK (quantity > 0),
+    state           VARCHAR(50)  NOT NULL,
+    version         BIGINT       NOT NULL DEFAULT 0
 );
+
+CREATE INDEX IF NOT EXISTS idx_order_items_state ON order_items(state);
 
 -- GIN index for full-text search on items
 CREATE INDEX IF NOT EXISTS idx_items_search_vector

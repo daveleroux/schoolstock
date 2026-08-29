@@ -1,7 +1,7 @@
 package org.schoolstock.schoolstock.repository;
 
 import org.schoolstock.schoolstock.model.Order;
-import org.schoolstock.schoolstock.model.SubOrderState;
+import org.schoolstock.schoolstock.model.OrderItemState;
 import org.schoolstock.schoolstock.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -15,7 +15,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("""
             SELECT DISTINCT o FROM Order o
-            LEFT JOIN FETCH o.subOrders
+            LEFT JOIN FETCH o.items
             WHERE o.createdBy = :user
               AND o.createdAt >= :from
               AND o.createdAt < :to
@@ -27,23 +27,23 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("""
             SELECT DISTINCT o FROM Order o
-            LEFT JOIN FETCH o.subOrders
+            LEFT JOIN FETCH o.items
             WHERE EXISTS (
-                SELECT s FROM SubOrder s WHERE s.order = o AND s.state = :state
+                SELECT i FROM OrderItem i WHERE i.order = o AND i.state = :state
             )
             ORDER BY o.createdAt ASC
             """)
-    List<Order> findOrdersWithSubOrderInState(@Param("state") SubOrderState state);
+    List<Order> findOrdersWithItemInState(@Param("state") OrderItemState state);
 
     @Query("""
             SELECT DISTINCT o FROM Order o
-            LEFT JOIN FETCH o.subOrders
+            LEFT JOIN FETCH o.items
             WHERE o.createdBy IN :orderers
               AND EXISTS (
-                  SELECT s FROM SubOrder s WHERE s.order = o AND s.state = :state
+                  SELECT i FROM OrderItem i WHERE i.order = o AND i.state = :state
               )
             ORDER BY o.createdAt ASC
             """)
-    List<Order> findOrdersForOrderersWithSubOrderInState(@Param("orderers") Collection<User> orderers,
-                                                         @Param("state") SubOrderState state);
+    List<Order> findOrdersForOrderersWithItemInState(@Param("orderers") Collection<User> orderers,
+                                                      @Param("state") OrderItemState state);
 }

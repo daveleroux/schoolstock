@@ -3,16 +3,16 @@ package org.schoolstock.schoolstock.model;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "sub_order_items")
-public class SubOrderItem {
+@Table(name = "order_items")
+public class OrderItem {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "sub_order_id", nullable = false)
-    private SubOrder subOrder;
+    @JoinColumn(name = "order_id", nullable = false)
+    private Order order;
 
     @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "item_id", nullable = false)
@@ -21,19 +21,28 @@ public class SubOrderItem {
     @Column(nullable = false)
     private int quantity;
 
-    public SubOrderItem() {}
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private OrderItemState state;
 
-    public SubOrderItem(SubOrder subOrder, Item item, int quantity) {
-        this.subOrder = subOrder;
+    @Version
+    @Column(nullable = false)
+    private long version;
+
+    public OrderItem() {}
+
+    public OrderItem(Order order, Item item, int quantity, OrderItemState state) {
+        this.order = order;
         this.item = item;
         this.quantity = quantity;
+        this.state = state;
     }
 
     public Long getId() { return id; }
 
-    public SubOrder getSubOrder() { return subOrder; }
+    public Order getOrder() { return order; }
 
-    public void setSubOrder(SubOrder subOrder) { this.subOrder = subOrder; }
+    public void setOrder(Order order) { this.order = order; }
 
     public Item getItem() { return item; }
 
@@ -42,4 +51,10 @@ public class SubOrderItem {
     public int getQuantity() { return quantity; }
 
     public void setQuantity(int quantity) { this.quantity = quantity; }
+
+    public OrderItemState getState() { return state; }
+
+    public void setState(OrderItemState state) { this.state = state; }
+
+    public long getVersion() { return version; }
 }

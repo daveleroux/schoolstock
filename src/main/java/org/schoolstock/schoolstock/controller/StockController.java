@@ -48,10 +48,10 @@ public class StockController {
         return "fragments/needs-prices-items :: needs-prices-items";
     }
 
-    @PostMapping("/sub-orders/{id}/deliver")
+    @PostMapping("/order-items/{id}/deliver")
     public String deliver(@PathVariable Long id, Model model) {
         try {
-            orderService.deliverSubOrder(id);
+            orderService.deliverOrderItem(id);
         } catch (IllegalStateException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
@@ -59,10 +59,10 @@ public class StockController {
         return "fragments/pending-orders :: pending-orders";
     }
 
-    @PostMapping("/sub-orders/{id}/cancel")
+    @PostMapping("/order-items/{id}/cancel")
     public String cancel(@PathVariable Long id, Model model) {
         try {
-            orderService.cancelSubOrder(id);
+            orderService.cancelOrderItem(id);
         } catch (IllegalStateException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }

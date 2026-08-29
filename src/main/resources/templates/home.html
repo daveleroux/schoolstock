@@ -627,28 +627,6 @@
             color: #718096;
         }
 
-        /* ── Sub-order cards ─────────────────────────── */
-        .sub-order-card {
-            border: 1px solid #edf2f7;
-            border-radius: 8px;
-            padding: 0.75rem 1rem;
-            margin-top: 0.5rem;
-            background-color: #f7fafc;
-        }
-
-        .sub-order-header {
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            margin-bottom: 0.6rem;
-        }
-
-        .sub-order-label {
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: #4a5568;
-        }
-
         /* ── State badges ────────────────────────────── */
         .state-badge {
             display: inline-block;
@@ -665,22 +643,22 @@
         .state-cancelled      { background-color: #f7fafc; border: 1px solid #cbd5e0; color: #718096; }
         .state-delivered      { background-color: #e6fffa; border: 1px solid #b2f5ea; color: #234e52; }
 
-        /* ── Sub-order items table ───────────────────── */
-        .sub-order-items-table {
+        /* ── Order items table ───────────────────────── */
+        .order-items-table {
             width: 100%;
             border-collapse: collapse;
             font-size: 0.875rem;
         }
 
-        .sub-order-items-table th,
-        .sub-order-items-table td {
+        .order-items-table th,
+        .order-items-table td {
             padding: 0.3rem 0.5rem;
             text-align: left;
             border-bottom: 1px solid #edf2f7;
             color: #4a5568;
         }
 
-        .sub-order-items-table th {
+        .order-items-table th {
             font-size: 0.75rem;
             font-weight: 600;
             text-transform: uppercase;
@@ -688,13 +666,13 @@
             color: #a0aec0;
         }
 
-        .sub-order-items-table .col-qty {
+        .order-items-table .col-qty {
             width: 4rem;
             text-align: right;
         }
 
-        /* ── Cancel sub-order button ─────────────────── */
-        .btn-cancel-suborder {
+        /* ── Cancel order item button ────────────────── */
+        .btn-cancel-item {
             padding: 0.25rem 0.7rem;
             background-color: #fff5f5;
             color: #c53030;
@@ -706,13 +684,12 @@
             transition: background-color 0.15s;
         }
 
-        .btn-cancel-suborder:hover { background-color: #fed7d7; }
+        .btn-cancel-item:hover { background-color: #fed7d7; }
 
-        /* ── Sub-order action buttons (stock controller) ── */
-        .sub-order-actions {
+        /* ── Order item action buttons (approver / stock controller) ── */
+        .item-actions {
             display: flex;
             gap: 0.4rem;
-            margin-left: auto;
         }
 
         .btn-deliver {
@@ -1065,7 +1042,7 @@
                 btn.textContent = original;
                 btn.classList.remove('btn-success', 'btn-error');
                 btn.disabled = false;
-            }, 1500);
+            }, 500);
         });
     </script>
 </body>

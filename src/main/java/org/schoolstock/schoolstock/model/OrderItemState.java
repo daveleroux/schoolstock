@@ -1,0 +1,40 @@
+package org.schoolstock.schoolstock.model;
+
+import java.util.Arrays;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+public enum OrderItemState {
+
+    NEEDS_PRICES {
+        @Override public Set<OrderItemState> validTransitions() { return Set.of(NEEDS_APPROVAL, CANCELLED); }
+    },
+    NEEDS_APPROVAL {
+        @Override public Set<OrderItemState> validTransitions() { return Set.of(PACKING, CANCELLED); }
+    },
+    PACKING {
+        @Override public Set<OrderItemState> validTransitions() { return Set.of(DELIVERED, CANCELLED); }
+    },
+    CANCELLED {
+        @Override public Set<OrderItemState> validTransitions() { return Set.of(); }
+    },
+    DELIVERED {
+        @Override public Set<OrderItemState> validTransitions() { return Set.of(); }
+    };
+
+    public abstract Set<OrderItemState> validTransitions();
+
+    public boolean canTransitionTo(OrderItemState target) {
+        return validTransitions().contains(target);
+    }
+
+    public boolean isTerminal() {
+        return validTransitions().isEmpty();
+    }
+
+    public String getDisplayName() {
+        return Arrays.stream(name().split("_"))
+                .map(w -> w.charAt(0) + w.substring(1).toLowerCase())
+                .collect(Collectors.joining(" "));
+    }
+}

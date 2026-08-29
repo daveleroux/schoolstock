@@ -3,9 +3,8 @@ package org.schoolstock.schoolstock.service;
 import org.schoolstock.schoolstock.model.*;
 import org.schoolstock.schoolstock.repository.CartItemRepository;
 import org.schoolstock.schoolstock.repository.ItemRepository;
+import org.schoolstock.schoolstock.repository.OrderItemRepository;
 import org.schoolstock.schoolstock.repository.OrderRepository;
-import org.schoolstock.schoolstock.repository.SubOrderItemRepository;
-import org.schoolstock.schoolstock.repository.SubOrderRepository;
 import org.schoolstock.schoolstock.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +14,6 @@ import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -24,21 +22,18 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final CartItemRepository cartItemRepository;
-    private final SubOrderRepository subOrderRepository;
-    private final SubOrderItemRepository subOrderItemRepository;
+    private final OrderItemRepository orderItemRepository;
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
 
     public OrderService(OrderRepository orderRepository,
                         CartItemRepository cartItemRepository,
-                        SubOrderRepository subOrderRepository,
-                        SubOrderItemRepository subOrderItemRepository,
+                        OrderItemRepository orderItemRepository,
                         ItemRepository itemRepository,
                         UserRepository userRepository) {
         this.orderRepository = orderRepository;
         this.cartItemRepository = cartItemRepository;
-        this.subOrderRepository = subOrderRepository;
-        this.subOrderItemRepository = subOrderItemRepository;
+        this.orderItemRepository = orderItemRepository;
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
     }
@@ -51,9 +46,9 @@ public class OrderService {
         List<Order> orders = orderRepository.findOrdersForUser(user, fromInstant, toInstant);
 
         if (!"ALL".equals(stateFilter)) {
-            SubOrderState filter = SubOrderState.valueOf(stateFilter);
+            OrderItemState filter = OrderItemState.valueOf(stateFilter);
             orders = orders.stream()
-                    .filter(o -> o.getSubOrders().stream().anyMatch(s -> s.getState() == filter))
+                    .filter(o -> o.getItems().stream().anyMatch(i -> i.getState() == filter))
                     .toList();
         }
         return orders;
@@ -61,28 +56,28 @@ public class OrderService {
 
     @Transactional(readOnly = true)
     public List<Order> getPendingOrders() {
-        return orderRepository.findOrdersWithSubOrderInState(SubOrderState.PACKING);
+        return orderRepository.findOrdersWithItemInState(OrderItemState.PACKING);
     }
 
     @Transactional(readOnly = true)
     public List<Item> getItemsNeedingPrices() {
-        return subOrderItemRepository.findDistinctItemsWithNullPriceInState(SubOrderState.NEEDS_PRICES);
+        return orderItemRepository.findDistinctItemsWithNullPriceInState(OrderItemState.NEEDS_PRICES);
     }
 
     @Transactional(readOnly = true)
     public List<Order> getOrdersNeedingApprovalFor(User approver) {
         List<User> orderers = userRepository.findByApproversContaining(approver);
         if (orderers.isEmpty()) return List.of();
-        return orderRepository.findOrdersForOrderersWithSubOrderInState(orderers, SubOrderState.NEEDS_APPROVAL);
+        return orderRepository.findOrdersForOrderersWithItemInState(orderers, OrderItemState.NEEDS_APPROVAL);
     }
 
-    public void approveSubOrder(Long subOrderId) {
-        SubOrder subOrder = subOrderRepository.findById(subOrderId)
-                .orElseThrow(() -> new IllegalArgumentException("Sub-order not found: " + subOrderId));
-        if (!subOrder.getState().canTransitionTo(SubOrderState.PACKING)) {
-            throw new IllegalStateException("Cannot approve sub-order in state: " + subOrder.getState());
+    public void approveOrderItem(Long orderItemId) {
+        OrderItem orderItem = orderItemRepository.findById(orderItemId)
+                .orElseThrow(() -> new IllegalArgumentException("Order item not found: " + orderItemId));
+        if (!orderItem.getState().canTransitionTo(OrderItemState.PACKING)) {
+            throw new IllegalStateException("Cannot approve order item in state: " + orderItem.getState());
         }
-        subOrder.setState(SubOrderState.PACKING);
+        orderItem.setState(OrderItemState.PACKING);
     }
 
     public void saveEstimatedPrice(Long itemId, BigDecimal price) {
@@ -90,55 +85,44 @@ public class OrderService {
                 .orElseThrow(() -> new IllegalArgumentException("Item not found: " + itemId));
         item.setEstimatedPrice(price.setScale(2, RoundingMode.HALF_UP));
 
-        List<SubOrder> affected = subOrderRepository.findByStateContainingItem(SubOrderState.NEEDS_PRICES, item);
-        for (SubOrder subOrder : affected) {
-            if (allPricesCaptured(subOrder)) {
-                subOrder.setState(SubOrderState.NEEDS_APPROVAL);
-            }
+        List<OrderItem> affected = orderItemRepository.findByStateAndItem(OrderItemState.NEEDS_PRICES, item);
+        for (OrderItem orderItem : affected) {
+            orderItem.setState(OrderItemState.NEEDS_APPROVAL);
         }
     }
 
-    private boolean allPricesCaptured(SubOrder subOrder) {
-        return subOrder.getItems().stream()
-                .allMatch(soi -> soi.getItem().getEstimatedPrice() != null);
+    public void deliverOrderItem(Long orderItemId) {
+        OrderItem orderItem = orderItemRepository.findById(orderItemId)
+                .orElseThrow(() -> new IllegalArgumentException("Order item not found: " + orderItemId));
+        if (!orderItem.getState().canTransitionTo(OrderItemState.DELIVERED)) {
+            throw new IllegalStateException("Cannot deliver order item in state: " + orderItem.getState());
+        }
+        Item item = orderItem.getItem();
+        // Decrease total stock; availableStock was already decremented when PACKING was created
+        item.setStockQuantity(item.getStockQuantity() - orderItem.getQuantity());
+        orderItem.setState(OrderItemState.DELIVERED);
     }
 
-    public void deliverSubOrder(Long subOrderId) {
-        SubOrder subOrder = subOrderRepository.findById(subOrderId)
-                .orElseThrow(() -> new IllegalArgumentException("Sub-order not found: " + subOrderId));
-        if (!subOrder.getState().canTransitionTo(SubOrderState.DELIVERED)) {
-            throw new IllegalStateException("Cannot deliver sub-order in state: " + subOrder.getState());
+    public void cancelOrderItem(Long orderItemId) {
+        OrderItem orderItem = orderItemRepository.findById(orderItemId)
+                .orElseThrow(() -> new IllegalArgumentException("Order item not found: " + orderItemId));
+        OrderItemState current = orderItem.getState();
+        if (!current.canTransitionTo(OrderItemState.CANCELLED)) {
+            throw new IllegalStateException("Cannot cancel order item in state: " + current);
         }
-        for (SubOrderItem soi : subOrder.getItems()) {
-            Item item = soi.getItem();
-            // Decrease total stock; availableStock was already decremented when PACKING was created
-            item.setStockQuantity(item.getStockQuantity() - soi.getQuantity());
+        if (current == OrderItemState.PACKING) {
+            Item item = orderItem.getItem();
+            item.setAvailableStock(item.getAvailableStock() + orderItem.getQuantity());
         }
-        subOrder.setState(SubOrderState.DELIVERED);
-    }
-
-    public void cancelSubOrder(Long subOrderId) {
-        SubOrder subOrder = subOrderRepository.findById(subOrderId)
-                .orElseThrow(() -> new IllegalArgumentException("Sub-order not found: " + subOrderId));
-        SubOrderState current = subOrder.getState();
-        if (!current.canTransitionTo(SubOrderState.CANCELLED)) {
-            throw new IllegalStateException("Cannot cancel sub-order in state: " + current);
-        }
-        if (current == SubOrderState.PACKING) {
-            for (SubOrderItem soi : subOrder.getItems()) {
-                Item item = soi.getItem();
-                item.setAvailableStock(item.getAvailableStock() + soi.getQuantity());
-            }
-        }
-        subOrder.setState(SubOrderState.CANCELLED);
+        orderItem.setState(OrderItemState.CANCELLED);
     }
 
     /**
      * Creates an Order from the current user's cart, then clears the cart.
      * Splitting rules:
-     *   - quantity ≤ availableStock → entire quantity → PACKING sub-order
-     *   - quantity > availableStock > 0 → split into PACKING + NEEDS_PRICES
-     *   - availableStock = 0 → entire quantity → NEEDS_PRICES sub-order
+     *   - quantity ≤ availableStock → entire quantity → PACKING order item
+     *   - quantity > availableStock > 0 → split into PACKING + NEEDS_PRICES/NEEDS_APPROVAL
+     *   - availableStock = 0 → entire quantity → NEEDS_PRICES/NEEDS_APPROVAL order item
      *
      * The persistent availableStock on each Item is decremented by the PACKING quantity.
      */
@@ -150,9 +134,6 @@ public class OrderService {
 
         Order order = new Order(Instant.now(), user);
 
-        List<SubOrderItem> pendingItems     = new ArrayList<>();
-        List<SubOrderItem> needsPricesItems = new ArrayList<>();
-
         for (CartItem ci : cartItems) {
             Item item          = ci.getItem();
             int available      = item.getAvailableStock();
@@ -161,34 +142,15 @@ public class OrderService {
             int needsPricesQty = requested - pendingQty;
 
             if (pendingQty > 0) {
-                pendingItems.add(new SubOrderItem(null, item, pendingQty));
+                order.getItems().add(new OrderItem(order, item, pendingQty, OrderItemState.PACKING));
                 item.setAvailableStock(available - pendingQty);
             }
             if (needsPricesQty > 0) {
-                needsPricesItems.add(new SubOrderItem(null, item, needsPricesQty));
+                OrderItemState state = item.getEstimatedPrice() != null
+                        ? OrderItemState.NEEDS_APPROVAL
+                        : OrderItemState.NEEDS_PRICES;
+                order.getItems().add(new OrderItem(order, item, needsPricesQty, state));
             }
-        }
-
-        int seq = 1;
-
-        if (!pendingItems.isEmpty()) {
-            SubOrder sub = new SubOrder(order, SubOrderState.PACKING, seq++);
-            for (SubOrderItem soi : pendingItems) {
-                soi.setSubOrder(sub);
-                sub.getItems().add(soi);
-            }
-            order.getSubOrders().add(sub);
-        }
-
-        if (!needsPricesItems.isEmpty()) {
-            boolean allAlreadyPriced = needsPricesItems.stream()
-                    .allMatch(soi -> soi.getItem().getEstimatedPrice() != null);
-            SubOrder sub = new SubOrder(order, allAlreadyPriced ? SubOrderState.NEEDS_APPROVAL : SubOrderState.NEEDS_PRICES, seq);
-            for (SubOrderItem soi : needsPricesItems) {
-                soi.setSubOrder(sub);
-                sub.getItems().add(soi);
-            }
-            order.getSubOrders().add(sub);
         }
 
         orderRepository.save(order);

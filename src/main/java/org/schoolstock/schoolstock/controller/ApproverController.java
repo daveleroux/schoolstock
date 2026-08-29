@@ -28,12 +28,12 @@ public class ApproverController {
         return "fragments/needs-approval-orders :: needs-approval-orders";
     }
 
-    @PostMapping("/sub-orders/{id}/approve")
+    @PostMapping("/order-items/{id}/approve")
     public String approve(@PathVariable Long id,
                           @AuthenticationPrincipal User approver,
                           Model model) {
         try {
-            orderService.approveSubOrder(id);
+            orderService.approveOrderItem(id);
         } catch (IllegalStateException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
@@ -41,12 +41,12 @@ public class ApproverController {
         return "fragments/needs-approval-orders :: needs-approval-orders";
     }
 
-    @PostMapping("/sub-orders/{id}/cancel")
+    @PostMapping("/order-items/{id}/cancel")
     public String cancel(@PathVariable Long id,
                          @AuthenticationPrincipal User approver,
                          Model model) {
         try {
-            orderService.cancelSubOrder(id);
+            orderService.cancelOrderItem(id);
         } catch (IllegalStateException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }

@@ -48,15 +48,15 @@ public class OrderController {
         return "fragments/order-list :: order-list";
     }
 
-    @PostMapping("/orders/sub-orders/{id}/cancel")
-    public String cancelSubOrder(@PathVariable Long id,
+    @PostMapping("/orders/order-items/{id}/cancel")
+    public String cancelOrderItem(@PathVariable Long id,
                                  @RequestParam(required = false) String from,
                                  @RequestParam(required = false) String to,
                                  @RequestParam(defaultValue = "ALL") String state,
                                  @AuthenticationPrincipal User user,
                                  Model model) {
         try {
-            orderService.cancelSubOrder(id);
+            orderService.cancelOrderItem(id);
         } catch (IllegalStateException e) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
         }
