@@ -10,6 +10,9 @@ public enum OrderItemState {
         @Override public Set<OrderItemState> validTransitions() { return Set.of(NEEDS_APPROVAL, CANCELLED); }
     },
     NEEDS_APPROVAL {
+        @Override public Set<OrderItemState> validTransitions() { return Set.of(AWAITING_STOCK, CANCELLED); }
+    },
+    AWAITING_STOCK {
         @Override public Set<OrderItemState> validTransitions() { return Set.of(PACKING, CANCELLED); }
     },
     PACKING {

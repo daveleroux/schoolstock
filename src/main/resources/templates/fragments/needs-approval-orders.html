@@ -50,7 +50,7 @@
                             <form th:attr="hx-post='/approver/order-items/' + ${oi.id} + '/approve'"
                                   hx-target="#needs-approval-orders"
                                   hx-swap="innerHTML"
-                                  hx-confirm="Approve this item? It will move to Packing.">
+                                  hx-confirm="Approve this item? It will move to Awaiting Stock.">
                                 <button type="submit" class="btn-approve">Approve</button>
                             </form>
                             <form th:attr="hx-post='/approver/order-items/' + ${oi.id} + '/cancel'"

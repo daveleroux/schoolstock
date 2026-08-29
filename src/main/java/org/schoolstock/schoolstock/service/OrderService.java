@@ -74,10 +74,10 @@ public class OrderService {
     public void approveOrderItem(Long orderItemId) {
         OrderItem orderItem = orderItemRepository.findById(orderItemId)
                 .orElseThrow(() -> new IllegalArgumentException("Order item not found: " + orderItemId));
-        if (!orderItem.getState().canTransitionTo(OrderItemState.PACKING)) {
+        if (!orderItem.getState().canTransitionTo(OrderItemState.AWAITING_STOCK)) {
             throw new IllegalStateException("Cannot approve order item in state: " + orderItem.getState());
         }
-        orderItem.setState(OrderItemState.PACKING);
+        orderItem.setState(OrderItemState.AWAITING_STOCK);
     }
 
     public void saveEstimatedPrice(Long itemId, BigDecimal price) {

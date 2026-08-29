@@ -43,6 +43,9 @@ public class SecurityConfig {
                 .requestMatchers("/approver/**").hasRole("APPROVER")
                 .anyRequest().authenticated()
             )
+            .exceptionHandling(exceptions -> exceptions
+                .authenticationEntryPoint(new HtmxAuthenticationEntryPoint())
+            )
             .formLogin(form -> form
                 .loginPage("/login")
                 .defaultSuccessUrl("/", true)

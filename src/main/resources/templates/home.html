@@ -116,6 +116,8 @@
 
         .item-stock { font-size: 0.8rem; color: #a0aec0; }
 
+        .item-price { font-size: 0.8rem; color: #a0aec0; }
+
         .badge-provisional {
             display: inline-block;
             padding: 0.1rem 0.45rem;
@@ -639,7 +641,8 @@
 
         .state-needs-prices   { background-color: #fffbeb; border: 1px solid #fbd38d; color: #744210; }
         .state-needs-approval { background-color: #ebf8ff; border: 1px solid #bee3f8; color: #2b6cb0; }
-        .state-pending        { background-color: #f0fff4; border: 1px solid #c6f6d5; color: #276749; }
+        .state-awaiting-stock { background-color: #faf5ff; border: 1px solid #e9d8fd; color: #553c9a; }
+        .state-packing        { background-color: #f0fff4; border: 1px solid #c6f6d5; color: #276749; }
         .state-cancelled      { background-color: #f7fafc; border: 1px solid #cbd5e0; color: #718096; }
         .state-delivered      { background-color: #e6fffa; border: 1px solid #b2f5ea; color: #234e52; }
 
@@ -861,6 +864,7 @@
                         <option value="ALL">&lt;All&gt;</option>
                         <option value="NEEDS_PRICES">Needs Prices</option>
                         <option value="NEEDS_APPROVAL">Needs Approval</option>
+                        <option value="AWAITING_STOCK">Awaiting Stock</option>
                         <option value="PACKING">Packing</option>
                         <option value="CANCELLED">Cancelled</option>
                         <option value="DELIVERED">Delivered</option>
