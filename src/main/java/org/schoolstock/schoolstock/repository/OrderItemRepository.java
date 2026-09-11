@@ -3,6 +3,7 @@ package org.schoolstock.schoolstock.repository;
 import org.schoolstock.schoolstock.model.Item;
 import org.schoolstock.schoolstock.model.OrderItem;
 import org.schoolstock.schoolstock.model.OrderItemState;
+import org.schoolstock.schoolstock.model.ShoppingListItem;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -44,4 +45,18 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
             ORDER BY oi.order.createdAt DESC, oi.id DESC
             """)
     List<OrderItem> findByStateAndItemNewestFirst(@Param("state") OrderItemState state, @Param("item") Item item);
+
+    /**
+     * Shopping list for the stock controller: one row per distinct item that
+     * has order items in the given state, with the required quantity being
+     * the sum of those order items' quantities.
+     */
+    @Query("""
+            SELECT new org.schoolstock.schoolstock.model.ShoppingListItem(oi.item, SUM(oi.quantity))
+            FROM OrderItem oi
+            WHERE oi.state = :state
+            GROUP BY oi.item
+            ORDER BY oi.item.name ASC
+            """)
+    List<ShoppingListItem> findShoppingList(@Param("state") OrderItemState state);
 }

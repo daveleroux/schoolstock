@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="shopping-list">
+
+    <p th:if="${#lists.isEmpty(shoppingList)}" class="empty-msg">Nothing needed &mdash; no items are awaiting stock.</p>
+
+    <table th:if="${!#lists.isEmpty(shoppingList)}" class="order-items-table">
+        <thead>
+            <tr>
+                <th>Item</th>
+                <th class="col-qty">Required</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="row : ${shoppingList}">
+                <td>
+                    <span th:text="${row.item.name}"></span>
+                    <span th:if="${row.item.provisional}" class="badge-provisional">Provisional</span>
+                </td>
+                <td class="col-qty" th:text="${row.requiredQuantity}"></td>
+            </tr>
+        </tbody>
+    </table>
+
+</div>
+
+</body>
+</html>

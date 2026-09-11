@@ -64,6 +64,16 @@ public class OrderService {
         return orderItemRepository.findDistinctItemsWithNullPriceInState(OrderItemState.NEEDS_PRICES);
     }
 
+    /**
+     * Shopping list for the stock controller: every item with order items
+     * currently AWAITING_STOCK, each with the total quantity required across
+     * those order items.
+     */
+    @Transactional(readOnly = true)
+    public List<ShoppingListItem> getShoppingList() {
+        return orderItemRepository.findShoppingList(OrderItemState.AWAITING_STOCK);
+    }
+
     @Transactional(readOnly = true)
     public List<Order> getOrdersNeedingApprovalFor(User approver) {
         List<User> orderers = userRepository.findByApproversContaining(approver);

@@ -41,6 +41,12 @@ public class StockController {
         return "fragments/needs-prices-items :: needs-prices-items";
     }
 
+    @GetMapping("/shopping-list")
+    public String shoppingList(Model model) {
+        model.addAttribute("shoppingList", orderService.getShoppingList());
+        return "fragments/shopping-list :: shopping-list";
+    }
+
     @PostMapping("/items/{id}/price")
     public String savePrice(@PathVariable Long id,
                             @RequestParam String price,

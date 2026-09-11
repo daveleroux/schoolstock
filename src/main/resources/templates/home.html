@@ -911,6 +911,7 @@
         <button class="tab-btn" data-tab="user-admin" sec:authorize="hasRole('ADMIN')">User Admin</button>
         <button class="tab-btn" data-tab="stock" sec:authorize="hasRole('STOCK_CONTROLLER')">Stock</button>
         <button class="tab-btn" data-tab="needs-prices" sec:authorize="hasRole('STOCK_CONTROLLER')">Needs Prices</button>
+        <button class="tab-btn" data-tab="shopping-list" sec:authorize="hasRole('STOCK_CONTROLLER')">Shopping List</button>
         <button class="tab-btn" data-tab="pending-orders" sec:authorize="hasRole('STOCK_CONTROLLER')">Packing Orders</button>
         <button class="tab-btn tab-cart" data-tab="cart" sec:authorize="hasRole('ORDERER')">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
@@ -1076,6 +1077,14 @@
             </div>
         </div>
 
+        <div id="panel-shopping-list" class="tab-panel" sec:authorize="hasRole('STOCK_CONTROLLER')">
+            <div id="shopping-list"
+                 hx-get="/stock/shopping-list"
+                 hx-trigger="tab-activated"
+                 hx-swap="innerHTML">
+            </div>
+        </div>
+
         <div id="panel-pending-orders" class="tab-panel" sec:authorize="hasRole('STOCK_CONTROLLER')">
             <div id="pending-orders"
                  hx-get="/stock/orders"
@@ -1129,6 +1138,10 @@
             if (tabName === 'needs-prices') {
                 const needsPrices = document.getElementById('needs-prices-items');
                 if (needsPrices) htmx.trigger(needsPrices, 'tab-activated');
+            }
+            if (tabName === 'shopping-list') {
+                const shoppingList = document.getElementById('shopping-list');
+                if (shoppingList) htmx.trigger(shoppingList, 'tab-activated');
             }
             if (tabName === 'pending-orders') {
                 const pendingOrders = document.getElementById('pending-orders');
