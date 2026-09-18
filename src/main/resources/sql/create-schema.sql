@@ -83,3 +83,12 @@ DROP TRIGGER IF EXISTS trg_items_search_vector ON items;
 CREATE TRIGGER trg_items_search_vector
     BEFORE INSERT OR UPDATE ON items
     FOR EACH ROW EXECUTE FUNCTION items_search_vector_update();
+
+-- budget_periods ------------------------------------------------
+CREATE TABLE IF NOT EXISTS budget_periods (
+    id         BIGSERIAL     PRIMARY KEY,
+    start_date DATE          NOT NULL,
+    end_date   DATE          NOT NULL,
+    amount     NUMERIC(10,2) NOT NULL CHECK (amount > 0),
+    CHECK (end_date >= start_date)
+);

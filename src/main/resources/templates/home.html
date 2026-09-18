@@ -894,6 +894,44 @@
             font-size: 0.8rem;
             color: #a0aec0;
         }
+
+        /* ── Budget periods (Set Budget tab) ─────────────── */
+        .budget-period-card {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 1rem 1.25rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .budget-period-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .budget-period-range {
+            font-weight: 700;
+            color: #1a202c;
+            font-size: 0.95rem;
+        }
+
+        .budget-period-amount {
+            font-weight: 600;
+            color: #2f855a;
+            margin-right: auto;
+        }
+
+        .budget-gap-banner {
+            border: 1px dashed #cbd5e0;
+            border-radius: 8px;
+            padding: 0.6rem 1rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.85rem;
+            color: #a0522d;
+            background-color: #fffaf0;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -909,6 +947,7 @@
         <button class="tab-btn" data-tab="orders" sec:authorize="hasRole('ORDERER')">Orders</button>
         <button class="tab-btn" data-tab="needs-approval" sec:authorize="hasRole('APPROVER')">Needs Approval</button>
         <button class="tab-btn" data-tab="user-admin" sec:authorize="hasRole('ADMIN')">User Admin</button>
+        <button class="tab-btn" data-tab="set-budget" sec:authorize="hasRole('ADMIN')">Set Budget</button>
         <button class="tab-btn" data-tab="stock" sec:authorize="hasRole('STOCK_CONTROLLER')">Stock</button>
         <button class="tab-btn" data-tab="needs-prices" sec:authorize="hasRole('STOCK_CONTROLLER')">Needs Prices</button>
         <button class="tab-btn" data-tab="shopping-list" sec:authorize="hasRole('STOCK_CONTROLLER')">Shopping List</button>
@@ -1016,6 +1055,14 @@
             </form>
             <div id="admin-user-list"
                  hx-get="/admin/users"
+                 hx-trigger="load"
+                 hx-swap="innerHTML">
+            </div>
+        </div>
+
+        <div id="panel-set-budget" class="tab-panel" sec:authorize="hasRole('ADMIN')">
+            <div id="budget-periods-container"
+                 hx-get="/admin/budget"
                  hx-trigger="load"
                  hx-swap="innerHTML">
             </div>

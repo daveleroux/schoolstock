@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="budget-periods">
+
+    <form class="admin-create-form"
+          hx-post="/admin/budget/create"
+          hx-target="#budget-periods-container"
+          hx-swap="innerHTML"
+          hx-on:htmx:after-request="if(event.detail.successful) this.reset()">
+        <input type="date" name="startDate" aria-label="Start date" required>
+        <input type="date" name="endDate" aria-label="End date" required>
+        <input type="number" name="amount" step="0.01" min="0.01" placeholder="Amount" required>
+        <button type="submit" class="btn-small-add">Add Budget Period</button>
+    </form>
+
+    <p th:if="${#lists.isEmpty(budgetPeriodRows)}" class="empty-msg">No budget periods defined yet.</p>
+
+    <th:block th:each="row : ${budgetPeriodRows}">
+
+        <div th:if="${row.gapBefore}" class="budget-gap-banner">
+            No budget defined from
+            <strong th:text="${#temporals.format(row.gapStart, 'dd MMM yyyy')}">start</strong>
+            to
+            <strong th:text="${#temporals.format(row.gapEnd, 'dd MMM yyyy')}">end</strong>
+        </div>
+
+        <div class="budget-period-card">
+            <div class="budget-period-header">
+                <span class="budget-period-range">
+                    <span th:text="${#temporals.format(row.period.startDate, 'dd MMM yyyy')}">Start</span>
+                    &rarr;
+                    <span th:text="${#temporals.format(row.period.endDate, 'dd MMM yyyy')}">End</span>
+                </span>
+                <span class="budget-period-amount" th:text="${row.period.amount}">0.00</span>
+                <button type="button" class="btn-edit-details"
+                        th:onclick="'toggleStockForm(\'budget-edit-' + ${row.period.id} + '\')'">Edit</button>
+            </div>
+
+            <form th:id="'budget-edit-' + ${row.period.id}" class="stock-inline-form"
+                  th:attr="hx-post='/admin/budget/' + ${row.period.id} + '/edit'"
+                  hx-target="#budget-periods-container"
+                  hx-swap="innerHTML">
+                <input type="date" name="startDate" th:value="${row.period.startDate}" aria-label="Start date" required>
+                <input type="date" name="endDate" th:value="${row.period.endDate}" aria-label="End date" required>
+                <input type="number" name="amount" step="0.01" min="0.01" th:value="${row.period.amount}" aria-label="Amount" required>
+                <button type="submit" class="btn-save-price">Save</button>
+            </form>
+        </div>
+
+    </th:block>
+
+</div>
+</body>
+</html>
