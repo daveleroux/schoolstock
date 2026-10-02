@@ -57,7 +57,8 @@
             border-bottom-color: #3182ce;
         }
 
-        .tab-cart { margin-left: auto; }
+        .tab-account { margin-left: auto; }
+        .tab-account + .tab-cart { margin-left: 0; }
 
         /* ── Tab panels ──────────────────────────────── */
         .tab-panel {
@@ -953,6 +954,95 @@
             border-radius: 10px;
             padding: 1.25rem;
         }
+
+        /* ── Change password ─────────────────────────── */
+        .password-card {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 1.25rem 1.5rem;
+            max-width: 28rem;
+        }
+
+        .password-card h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1a202c;
+            margin-bottom: 1rem;
+        }
+
+        .password-field {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            margin-bottom: 0.9rem;
+        }
+
+        .password-field label {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .password-field input {
+            padding: 0.6rem 0.9rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            color: #2d3748;
+            background-color: #f7fafc;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .password-field input:focus {
+            outline: none;
+            border-color: #4299e1;
+            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+            background-color: #fff;
+        }
+
+        .password-requirements {
+            font-size: 0.85rem;
+            color: #4a5568;
+            margin-bottom: 1rem;
+        }
+
+        .password-requirements-label { font-weight: 600; }
+
+        .password-requirements ul {
+            margin: 0.35rem 0 0 1.2rem;
+            padding: 0;
+        }
+
+        .password-requirements li.requirement-failed {
+            color: #c53030;
+            font-weight: 600;
+        }
+
+        .admin-password-info {
+            margin-bottom: 1.25rem;
+        }
+
+        .password-banner {
+            border-radius: 8px;
+            padding: 0.65rem 0.9rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .password-banner-success {
+            background-color: #f0fff4;
+            border: 1px solid #c6f6d5;
+            color: #276749;
+        }
+
+        .password-banner-error {
+            background-color: #fff5f5;
+            border: 1px solid #fed7d7;
+            color: #c53030;
+        }
     </style>
 </head>
 <body>
@@ -974,6 +1064,7 @@
         <button class="tab-btn" data-tab="needs-prices" sec:authorize="hasRole('STOCK_CONTROLLER')">Needs Prices</button>
         <button class="tab-btn" data-tab="shopping-list" sec:authorize="hasRole('STOCK_CONTROLLER')">Shopping List</button>
         <button class="tab-btn" data-tab="pending-orders" sec:authorize="hasRole('STOCK_CONTROLLER')">Packing Orders</button>
+        <button class="tab-btn tab-account" data-tab="change-password">Change Password</button>
         <button class="tab-btn tab-cart" data-tab="cart" sec:authorize="hasRole('ORDERER')">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"
                  fill="none" stroke="currentColor" stroke-width="2.2"
@@ -1065,16 +1156,21 @@
             </div>
         </div>
 
+        <div id="panel-change-password" class="tab-panel">
+            <div th:replace="~{fragments/change-password :: change-password}"></div>
+        </div>
+
         <div id="panel-user-admin" class="tab-panel" sec:authorize="hasRole('ADMIN')">
             <form class="admin-create-form"
                   hx-post="/admin/users/create"
                   hx-target="#admin-user-list"
                   hx-swap="innerHTML"
-                  hx-on:htmx:after-request="if(event.detail.successful) this.reset()">
+                  hx-on:htmx:after-request="adminCreateUserDone(event, this)">
                 <input type="text" name="username" placeholder="Username" required>
-                <input type="password" name="password" placeholder="Password" required>
+                <input type="password" name="password" placeholder="Password" autocomplete="new-password" required>
                 <button type="submit" class="btn-small-add">Create User</button>
             </form>
+            <div th:replace="~{fragments/admin-password-info :: admin-password-info}"></div>
             <div id="admin-user-list"
                  hx-get="/admin/users"
                  hx-trigger="load"
@@ -1265,6 +1361,19 @@
 
             activateTab(window.location.hash.slice(1) || DEFAULT_TAB);
         });
+
+        // Create User form: a rejected password comes back with HX-Retarget (the
+        // requirements block is updated and the form keeps its values); on success
+        // reset the form and clear any earlier error highlighting.
+        function adminCreateUserDone(event, form) {
+            if (!event.detail.successful) return;
+            if (event.detail.xhr.getResponseHeader('HX-Retarget')) return;
+            form.reset();
+            const info = document.getElementById('admin-password-info');
+            info.querySelector('.password-banner')?.remove();
+            info.querySelectorAll('.requirement-failed')
+                .forEach(li => li.classList.remove('requirement-failed'));
+        }
 
         // Toggle an inline stock-management form (Edit Details / Stock Bought /
         // Adjust Stock Down) open or closed.
