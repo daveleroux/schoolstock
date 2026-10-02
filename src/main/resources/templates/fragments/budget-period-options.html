@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="budget-period-options">
+    <option value="">Select a period&hellip;</option>
+    <option th:each="period : ${periods}"
+            th:value="${period.id}"
+            th:text="${#temporals.format(period.startDate, 'dd MMM yyyy')} + ' - ' + ${#temporals.format(period.endDate, 'dd MMM yyyy')} + ' (' + ${period.amount} + ')'">
+        period
+    </option>
+</th:block>
+</body>
+</html>

@@ -92,3 +92,13 @@ CREATE TABLE IF NOT EXISTS budget_periods (
     amount     NUMERIC(10,2) NOT NULL CHECK (amount > 0),
     CHECK (end_date >= start_date)
 );
+
+-- stock_purchase_log ----------------------------------------------
+-- Audit trail of stock purchases recorded via OrderService.recordStockPurchase.
+CREATE TABLE IF NOT EXISTS stock_purchase_log (
+    id            BIGSERIAL     PRIMARY KEY,
+    purchase_date DATE          NOT NULL,
+    item_id       BIGINT        NOT NULL REFERENCES items(id),
+    price         NUMERIC(10,2) NOT NULL CHECK (price > 0),
+    quantity      INTEGER       NOT NULL CHECK (quantity > 0)
+);

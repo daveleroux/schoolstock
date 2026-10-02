@@ -932,6 +932,27 @@
             background-color: #fffaf0;
             text-align: center;
         }
+
+        .budget-select-group {
+            max-width: 22rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .budget-select-group select {
+            padding: 0.5rem 0.7rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            color: #2d3748;
+            background-color: #f7fafc;
+        }
+
+        .budget-chart-container {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 1.25rem;
+        }
     </style>
 </head>
 <body>
@@ -948,6 +969,7 @@
         <button class="tab-btn" data-tab="needs-approval" sec:authorize="hasRole('APPROVER')">Needs Approval</button>
         <button class="tab-btn" data-tab="user-admin" sec:authorize="hasRole('ADMIN')">User Admin</button>
         <button class="tab-btn" data-tab="set-budget" sec:authorize="hasRole('ADMIN')">Set Budget</button>
+        <button class="tab-btn" data-tab="view-budget" sec:authorize="hasAnyRole('ADMIN', 'APPROVER')">View Budget</button>
         <button class="tab-btn" data-tab="stock" sec:authorize="hasRole('STOCK_CONTROLLER')">Stock</button>
         <button class="tab-btn" data-tab="needs-prices" sec:authorize="hasRole('STOCK_CONTROLLER')">Needs Prices</button>
         <button class="tab-btn" data-tab="shopping-list" sec:authorize="hasRole('STOCK_CONTROLLER')">Shopping List</button>
@@ -1068,6 +1090,24 @@
             </div>
         </div>
 
+        <div id="panel-view-budget" class="tab-panel" sec:authorize="hasAnyRole('ADMIN', 'APPROVER')">
+            <div class="filter-group budget-select-group">
+                <label for="budget-period-select">Budget Period</label>
+                <select id="budget-period-select"
+                        hx-get="/budget/periods"
+                        hx-trigger="load"
+                        hx-swap="innerHTML"
+                        onchange="loadBudgetChart(this.value)">
+                    <option value="">Select a period&hellip;</option>
+                </select>
+            </div>
+
+            <p id="budget-chart-empty" class="empty-msg">Select a budget period to view its usage chart.</p>
+            <div id="budget-chart-container" class="budget-chart-container" style="display:none">
+                <canvas id="budget-chart"></canvas>
+            </div>
+        </div>
+
         <div id="panel-needs-approval" class="tab-panel" sec:authorize="hasRole('APPROVER')">
             <div id="needs-approval-orders"
                  hx-get="/approver/orders"
@@ -1145,6 +1185,7 @@
     <div id="toast-container" aria-live="assertive" aria-atomic="false"></div>
 
     <script th:src="@{/js/htmx.min.js}"></script>
+    <script th:src="@{/js/chart.umd.min.js}"></script>
     <script>
         // Attach CSRF token to every HTMX request
         document.addEventListener('htmx:configRequest', (event) => {
@@ -1231,6 +1272,76 @@
             const form = document.getElementById(id);
             if (!form) return;
             form.style.display = (form.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        // ── View Budget chart (Chart.js) ────────────────
+        let budgetChart = null;
+
+        function loadBudgetChart(periodId) {
+            const empty     = document.getElementById('budget-chart-empty');
+            const container = document.getElementById('budget-chart-container');
+
+            if (!periodId) {
+                container.style.display = 'none';
+                empty.style.display = '';
+                if (budgetChart) { budgetChart.destroy(); budgetChart = null; }
+                return;
+            }
+
+            fetch(`/budget/periods/${periodId}/usage`)
+                .then(res => { if (!res.ok) throw new Error('Failed to load budget usage'); return res.json(); })
+                .then(renderBudgetChart)
+                .catch(() => showToast('Failed to load budget chart.'));
+        }
+
+        function renderBudgetChart(usage) {
+            const empty     = document.getElementById('budget-chart-empty');
+            const container = document.getElementById('budget-chart-container');
+            empty.style.display = 'none';
+            container.style.display = '';
+
+            const points = usage.points;
+            const canvas = document.getElementById('budget-chart');
+
+            if (budgetChart) budgetChart.destroy();
+            budgetChart = new Chart(canvas.getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: points.map(p => p.date),
+                    datasets: [{
+                        label: 'Budget remaining',
+                        data: points.map(p => p.remaining),
+                        stepped: true,
+                        fill: true,
+                        borderColor: '#3182ce',
+                        backgroundColor: 'rgba(49, 130, 206, 0.1)',
+                        pointRadius: points.map(p => p.itemName ? 4 : 0),
+                        pointHoverRadius: points.map(p => p.itemName ? 6 : 0),
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: { title: { display: true, text: 'Date' } },
+                        y: { title: { display: true, text: 'Budget remaining' }, beginAtZero: true }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: (ctx) => {
+                                    const p = points[ctx.dataIndex];
+                                    const lines = [`Remaining: ${ctx.parsed.y}`];
+                                    if (p.itemName) {
+                                        lines.push(`Item: ${p.itemName}`);
+                                        lines.push(`Quantity: ${p.quantity}`);
+                                        lines.push(`Price: ${p.price}`);
+                                    }
+                                    return lines;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
         }
 
         // Toast notifications

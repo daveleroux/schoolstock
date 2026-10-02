@@ -5,6 +5,7 @@ import org.schoolstock.schoolstock.repository.CartItemRepository;
 import org.schoolstock.schoolstock.repository.ItemRepository;
 import org.schoolstock.schoolstock.repository.OrderItemRepository;
 import org.schoolstock.schoolstock.repository.OrderRepository;
+import org.schoolstock.schoolstock.repository.StockPurchaseLogRepository;
 import org.schoolstock.schoolstock.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,17 +26,20 @@ public class OrderService {
     private final OrderItemRepository orderItemRepository;
     private final ItemRepository itemRepository;
     private final UserRepository userRepository;
+    private final StockPurchaseLogRepository stockPurchaseLogRepository;
 
     public OrderService(OrderRepository orderRepository,
                         CartItemRepository cartItemRepository,
                         OrderItemRepository orderItemRepository,
                         ItemRepository itemRepository,
-                        UserRepository userRepository) {
+                        UserRepository userRepository,
+                        StockPurchaseLogRepository stockPurchaseLogRepository) {
         this.orderRepository = orderRepository;
         this.cartItemRepository = cartItemRepository;
         this.orderItemRepository = orderItemRepository;
         this.itemRepository = itemRepository;
         this.userRepository = userRepository;
+        this.stockPurchaseLogRepository = stockPurchaseLogRepository;
     }
 
     @Transactional(readOnly = true)
@@ -139,9 +143,13 @@ public class OrderService {
         }
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("Item not found: " + itemId));
-        item.setEstimatedPrice(price.setScale(2, RoundingMode.HALF_UP));
+        BigDecimal normalizedPrice = price.setScale(2, RoundingMode.HALF_UP);
+        item.setEstimatedPrice(normalizedPrice);
         moveNeedsPricesToApproval(item);
         increaseStock(item, quantity);
+
+        stockPurchaseLogRepository.save(new StockPurchaseLog(
+                LocalDate.now(ZoneOffset.UTC), itemId, normalizedPrice, quantity));
     }
 
     /**

@@ -41,6 +41,7 @@ public class SecurityConfig {
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/stock/**").hasRole("STOCK_CONTROLLER")
                 .requestMatchers("/approver/**").hasRole("APPROVER")
+                .requestMatchers("/budget/**").hasAnyRole("ADMIN", "APPROVER")
                 .anyRequest().authenticated()
             )
             .exceptionHandling(exceptions -> exceptions
