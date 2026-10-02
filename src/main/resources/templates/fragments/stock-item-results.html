@@ -36,6 +36,7 @@
               hx-swap="innerHTML">
             <input type="text" name="name" th:value="${item.name}" placeholder="Item name" required>
             <input type="text" name="description" th:value="${item.description}" placeholder="Description">
+            <input type="number" name="price" step="0.01" min="0" th:value="${item.estimatedPrice}" placeholder="Estimated price">
             <button type="submit" class="btn-save-price">Save</button>
         </form>
 

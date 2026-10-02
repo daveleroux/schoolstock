@@ -101,9 +101,14 @@ public class StockController {
     public String editItem(@PathVariable Long id,
                            @RequestParam String name,
                            @RequestParam(defaultValue = "") String description,
+                           @RequestParam(defaultValue = "") String price,
                            Model model) {
         try {
-            orderService.updateItemDetails(id, name.trim(), description.isBlank() ? null : description.trim());
+            BigDecimal estimatedPrice = price.isBlank() ? null : new BigDecimal(price.trim());
+            orderService.updateItemDetails(id, name.trim(), description.isBlank() ? null : description.trim(),
+                    estimatedPrice);
+        } catch (NumberFormatException e) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Invalid price value.");
         } catch (IllegalArgumentException e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
         }

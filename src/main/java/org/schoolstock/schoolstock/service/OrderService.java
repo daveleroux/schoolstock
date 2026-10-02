@@ -253,11 +253,25 @@ public class OrderService {
         return itemRepository.save(item);
     }
 
-    public void updateItemDetails(Long itemId, String name, String description) {
+    /**
+     * Updates an item's name, description and, optionally, its estimated price.
+     * A {@code null} {@code estimatedPrice} leaves the current price untouched
+     * (a captured price can never be cleared). A non-null price replaces the
+     * current one and, as with any price update, moves the item's NEEDS_PRICES
+     * order items forward to NEEDS_APPROVAL.
+     */
+    public void updateItemDetails(Long itemId, String name, String description, BigDecimal estimatedPrice) {
         Item item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new IllegalArgumentException("Item not found: " + itemId));
         item.setName(name);
         item.setDescription(description);
+        if (estimatedPrice != null) {
+            if (estimatedPrice.signum() < 0) {
+                throw new IllegalArgumentException("Estimated price cannot be negative.");
+            }
+            item.setEstimatedPrice(estimatedPrice.setScale(2, RoundingMode.HALF_UP));
+            moveNeedsPricesToApproval(item);
+        }
     }
 
     public void deliverOrderItem(Long orderItemId) {
